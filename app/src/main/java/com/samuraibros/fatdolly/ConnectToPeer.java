@@ -1,5 +1,8 @@
 package com.samuraibros.fatdolly;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -8,10 +11,13 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,11 +28,12 @@ import java.util.Map;
 public class ConnectToPeer extends BaseActivity {
 
 
-    private WifiP2pDevice device;
+    private WifiP2pDevice mDevice;
     private WifiP2pConfig config = new WifiP2pConfig();
     private ArrayAdapter peerDevices_arrayAdapter;
     private ListView peerDevices_listView;
     private Map<String, String> peerNametoAddress_map = new HashMap<>();
+    private Map<String, WifiP2pDevice> peerAddresstoDevice_map = new HashMap<>();
     private final HashMap<String, String> peerHubs = new HashMap<String, String>();
     private WifiP2pManager.DnsSdTxtRecordListener txtListener;
     private WifiP2pManager.DnsSdServiceResponseListener servListener;
@@ -35,6 +42,8 @@ public class ConnectToPeer extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_peer);
+
+        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: onCreate: started");
 
         mPeerListListener  = new WifiP2pManager.PeerListListener() {
             @Override
@@ -48,6 +57,7 @@ public class ConnectToPeer extends BaseActivity {
                         Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: New peer available -" + dev.deviceName);
                         //peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
                         peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
+                        peerAddresstoDevice_map.put(dev.deviceAddress, dev);
                         new_peer = true;
                     }
                     else {
@@ -127,7 +137,47 @@ public class ConnectToPeer extends BaseActivity {
                     }
                 });
 
+        peerDevices_listView = (ListView) findViewById(R.id.listView_connectToPeer);
+
+        // Sets the responses when the various device in the list view are clicked
+        peerDevices_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                // Gets the device name and mac address and parses them out of the string
+                final String device_name = (String) peerDevices_listView.getItemAtPosition(position);
+                final String device_address = peerNametoAddress_map.get(device_name);
+                final WifiP2pDevice device = peerAddresstoDevice_map.get(device_address);
+                // Creates a popup dialog to provide further choices for a response
+                final AlertDialog alertDialog = new AlertDialog.Builder(ConnectToPeer.this).create(); //Read Update
+                // Sets the title for the popup dialog
+                alertDialog.setTitle(device_name);
+
+                //Adds the device to the connectedDevice list and adds it to the connected state
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Connect", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mDevice = device;
+                        connectPeer();
+
+                    }
+
+                });
+
+                // Cancels the popup dialogue
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        alertDialog.cancel();
+                    }
+                });
+
+                // Displays the dialogue
+                alertDialog.show();
+            }
+        });
+
         refreshPeers(null);
+
+        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: onCreate: ended");
 
 
     }
@@ -157,7 +207,7 @@ public class ConnectToPeer extends BaseActivity {
      * Used to connect to peer
      */
     private void connectPeer() {
-        config.deviceAddress = device.deviceAddress;
+        config.deviceAddress = mDevice.deviceAddress;
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -196,8 +246,6 @@ public class ConnectToPeer extends BaseActivity {
                         return view;
                     }
                 };
-        // Gets reference to the UI list view
-        peerDevices_listView = (ListView) findViewById(R.id.listView_connectToPeer);
 
         // Connects the list view to the adapter
         peerDevices_listView.setAdapter(peerDevices_arrayAdapter);
