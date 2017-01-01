@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@android:color/background_dark"
+    tools:context="com.samuraibros.fatdolly.HubSettings">
+
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:id="@+id/linearlayout_hubName">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hub Name:\t"
+            android:layout_alignParentStart="true"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/textview_hubName"
+            android:textColor="@android:color/white" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/white"
+            android:id="@+id/edittext_hubName" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/linearlayout_hubName"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
+        android:id="@+id/linearlayout_theme">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Theme"
+            android:layout_alignParentStart="true"
+            android:textColor="@android:color/white"
+            android:id="@+id/textview_theme" />
+        <Spinner
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_theme"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="center"
+            android:background="@android:color/darker_gray"
+            android:spinnerMode="dialog"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upgrade to Pro"
+        android:id="@+id/button_upgrade"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:onClick="onUpgrade" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/linearlayout_theme"
+        android:layout_marginBottom="30dp"
+        android:id="@+id/linearlayout_maxUsers">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Max Users (Limit 3):"
+            android:id="@+id/textview_maxUsers"
+            android:layout_alignParentStart="true"
+            android:textColor="@android:color/white"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:background="@android:color/darker_gray"
+            android:ems="5"
+            android:text="3"
+            android:textAlignment="center"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/edittext_maxUsers"
+            android:textColor="@android:color/white" />
+    </RelativeLayout>
+
+    <Switch
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Connected Hubs"
+        android:layout_below="@id/linearlayout_maxUsers"
+        android:id="@+id/switch_saveHubs"
+        android:textColor="@android:color/white"
+        android:checked="false" />
+
+    <Switch
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Forget device when out of range"
+        android:id="@+id/switch_forgetDevice"
+        android:textColor="@android:color/white"
+        android:layout_below="@id/switch_saveHubs"
+        android:checked="false" />
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/button_upgrade"
+        android:layout_below="@id/switch_forgetDevice"
+        android:gravity="center"
+        android:id="@+id/linearlayout_ratings">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Rate our App!"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:textColor="@android:color/white"
+            android:id="@+id/textview_ratings" />
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/darker_gray"
+            android:id="@+id/ratingbar_ratings"
+            android:layout_below="@id/textview_ratings" />
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

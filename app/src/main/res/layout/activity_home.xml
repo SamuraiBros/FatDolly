@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,25 +9,102 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.samuraibros.fatdolly.Home">
-
+    tools:context="com.samuraibros.fatdolly.Home"
+    android:background="@android:color/black">
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_connectToPeer"
-        android:id="@+id/button_connectToPeer"
-        android:onClick="gotoConnectToPeer"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/button_notifications"
+        android:layout_gravity="end"
+        android:background="@mipmap/ic_notifications"
+        android:onClick="gotoNotifications" />
 
     <TextView
         android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/textView_home"
-        android:id="@+id/textView_home"
-        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Music, unchained"
+        android:textSize="15sp"
+        android:textColor="@android:color/white"
+        android:id="@+id/textview_logo"
+        android:layout_below="@+id/imageview_logo"
+        android:layout_marginTop="-30dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageview_logo"
+        android:src="@mipmap/logo_audhub"
+        android:scaleX=".75"
+        android:scaleY=".75"
         android:layout_centerHorizontal="true" />
+
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/textview_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:id="@+id/layout_options"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/message_turnWifiOn"
+            android:textSize="15sp"
+            android:textColor="@android:color/white"
+            android:id="@+id/textview_wifistatus"
+            android:layout_centerHorizontal="true" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/layout_hub"
+            android:gravity="center_horizontal"
+            android:layout_below="@id/textview_wifistatus">
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:id="@+id/button_hub"
+                android:background="@mipmap/ic_myhub"
+                android:onClick="gotoHub"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:id="@+id/button_connecttohub"
+                android:background="@mipmap/ic_otherhub"
+                android:onClick="gotoAddHub" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/layout_settings"
+            android:layout_below="@id/layout_hub"
+            android:gravity="center_horizontal">
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:id="@+id/button_settings"
+                android:background="@mipmap/ic_settings"
+                android:onClick="gotoSettings" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
 </RelativeLayout>

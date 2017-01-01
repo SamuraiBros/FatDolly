@@ -38,7 +38,7 @@ public class HubNotificationListenerService extends NotificationListenerService 
         public void onReceive(Context context, Intent intent) {
             //Gets the actions of the intent
             String action = intent.getAction();
-            Log.d("AudHub", "HubNotoficationService: BroadcastReceiver: Action to " + action);
+            Log.d(getResources().getString(R.string.app_name), "HubNotoficationService: BroadcastReceiver: Action to " + action);
 
 
         }
@@ -70,7 +70,7 @@ public class HubNotificationListenerService extends NotificationListenerService 
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("AudHub", "HubService: onBind: new binding wtih " + intent.getAction());
+        Log.d(getResources().getString(R.string.app_name), "HubService: onBind: new binding wtih " + intent.getAction());
         return mBinder;
     }
 
@@ -82,7 +82,7 @@ public class HubNotificationListenerService extends NotificationListenerService 
      */
     @Override
     public void onClientMetadataUpdate(RemoteController.MetadataEditor metadataEditor) {
-        Log.d("AudHub", "HubNotificationService: onClientMetadataUpdate: starting...");
+        Log.d(getResources().getString(R.string.app_name), "HubNotificationService: onClientMetadataUpdate: starting...");
 
         //Retrieves the song title
         String song_title = metadataEditor.getString(MediaMetadataRetriever.METADATA_KEY_TITLE, "Unknown");
@@ -101,7 +101,7 @@ public class HubNotificationListenerService extends NotificationListenerService 
         i.putExtra("SongTitle", song_title);
         i.putExtra("SongArtist", song_artist);
         sendBroadcast(i);
-        Log.d("AudHub", "HubNotificationService: onClientMetadataUpdate: Ended");
+        Log.d(getResources().getString(R.string.app_name), "HubNotificationService: onClientMetadataUpdate: Ended");
     }
 
     @Override
