@@ -38,13 +38,18 @@ public class ConnectToPeer extends BaseActivity {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peers) {
                 //Clear the map list and add the new list of name adn address pairings
-                peerNametoAddress_map.clear();
-                peerDevices_arrayAdapter.clear();
+                boolean new_peer = false;
                 for (WifiP2pDevice dev : peers.getDeviceList()) {
-                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress))
+                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress)) {
                         peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
+                        new_peer = true;
+                    }
                 }
-                peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
+
+                if (new_peer) {
+                    peerDevices_arrayAdapter.clear();
+                    peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
+                }
             }
         };
 
@@ -59,8 +64,10 @@ public class ConnectToPeer extends BaseActivity {
             public void onDnsSdTxtRecordAvailable(
                     String fullDomain, Map record, WifiP2pDevice device) {
                 Log.d(getResources().getString(R.string.app_name), this.toString() + ": DnsSdTxtRecord available -" + record.toString());
-                peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hubName)));
-                refreshPeers(null);
+                if (!peerHubs.keySet().contains(device.deviceAddress)) {
+                    peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hubName)));
+                    discoverService();
+                }
             }
         };
 
@@ -155,6 +162,7 @@ public class ConnectToPeer extends BaseActivity {
      * @param view
      */
     public void refreshPeers(View view) {
+        peerNametoAddress_map.clear();
         // Initializes the adapter
         peerDevices_arrayAdapter  =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1) {
