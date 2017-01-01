@@ -35,9 +35,9 @@ public class Notifications extends BaseActivity {
         setContentView(R.layout.activity_notifications);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass = Notifications.class.toString();
+        mClass_string = Notifications.class.toString();
 
-        Log.d("AudHub", "Notifications: onCreate: starting...");
+        Log.d(getResources().getString(R.string.app_name), "Notifications: onCreate: starting...");
 
         // Reset the list view
         if (!running)
@@ -73,7 +73,7 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_switch_control));
@@ -95,7 +95,7 @@ public class Notifications extends BaseActivity {
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
                             i.putExtra(getResources().getString(R.string.extra_accept), false);
                             sendBroadcast(i);
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             refresh(null);
                             close(prev_screen);
                         }
@@ -105,7 +105,7 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_waiting_for_users));
@@ -127,7 +127,7 @@ public class Notifications extends BaseActivity {
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
                             i.putExtra(getResources().getString(R.string.extra_accept), false);
                             sendBroadcast(i);
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             refresh(null);
                             close(prev_screen);
                         }
@@ -137,7 +137,7 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_switch_control));
@@ -157,7 +157,7 @@ public class Notifications extends BaseActivity {
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_give));
                             i.putExtra(getResources().getString(R.string.extra_accept), false);
                             sendBroadcast(i);
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             refresh(null);
                             close(prev_screen);
                         }
@@ -167,7 +167,7 @@ public class Notifications extends BaseActivity {
                     // Clear Notifications list
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_clear), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Configurations.dequeueNotification(message);
+                            Configurations.dequeueNotification(Notifications.this, message);
                             refresh(null);
                         }
                     });
@@ -179,7 +179,7 @@ public class Notifications extends BaseActivity {
         });
 
         running = true;
-        Log.d("AudHub", "Notifications: onCreate: ended");
+        Log.d(getResources().getString(R.string.app_name), "Notifications: onCreate: ended");
     }
 
     @Override
@@ -216,7 +216,7 @@ public class Notifications extends BaseActivity {
 
         // Connects the list view to the adapter
         notifications_listView.setAdapter(notifications_arrayAdapter);
-        Configurations.dequeueNotification(null);
+        Configurations.dequeueNotification(Notifications.this, null);
         // Loop through connected users and add the name and address to the list
         for (String mess : Configurations.getNotifications()) {
             notifications_arrayAdapter.add(mess);

@@ -59,7 +59,7 @@ public class Hub extends BaseActivity {
 
         //Get the needed configurations items
         registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass = Hub.class.toString();
+        mClass_string = Hub.class.toString();
 
         if (Configurations.isController())
             startRegistration();

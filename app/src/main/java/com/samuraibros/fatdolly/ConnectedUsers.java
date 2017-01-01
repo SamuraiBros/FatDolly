@@ -33,9 +33,9 @@ public class ConnectedUsers extends BaseActivity{
         setContentView(R.layout.activity_connected_users);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass = ConnectedUsers.class.toString();
+        mClass_string = ConnectedUsers.class.toString();
 
-        Log.d("AudHub", "ConnectedUsers: onCreate: starting...");
+        Log.d(getResources().getString(R.string.app_name), "ConnectedUsers: onCreate: starting...");
 
         // Reference to UI list view for device listing
         final ListView connectedUsers_listView = (ListView) findViewById(R.id.listview_connectedUsers);
@@ -251,7 +251,7 @@ public class ConnectedUsers extends BaseActivity{
 
 
         running = true;
-        Log.d("AudHub", "ConnectedUsers: onCreate: ended");
+        Log.d(getResources().getString(R.string.app_name), "ConnectedUsers: onCreate: ended");
     }
 
     @Override

@@ -59,7 +59,7 @@ public class ConnectToHub extends BaseActivity {
         setContentView(R.layout.activity_connect_to_hub);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass = ConnectToHub.class.toString();
+        mClass_string = ConnectToHub.class.toString();
 
         running = true;
 
@@ -315,7 +315,7 @@ public class ConnectToHub extends BaseActivity {
         refresh(null);
 
         running = true;
-        Log.d("AudHub", "ConnectToHub: onCreate: ended");
+        Log.d(getResources().getString(R.string.app_name), "ConnectToHub: onCreate: ended");
     }
 
     @Override
@@ -381,7 +381,7 @@ public class ConnectToHub extends BaseActivity {
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 /*Intent intent = new Intent(ConnectToHub.this, Loading.class);
-                intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+                intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
                 intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_connect_to_hub));
                 intent.putExtra(getResources().getString(R.string.extra_loading_class), Hub.class.toString());
                 startActivity(intent);

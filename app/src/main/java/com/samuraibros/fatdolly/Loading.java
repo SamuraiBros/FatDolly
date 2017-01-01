@@ -17,9 +17,12 @@ import android.util.Log;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class Loading extends BaseActivity {
 
@@ -41,7 +44,7 @@ public class Loading extends BaseActivity {
     @Override
     protected void onReceive_helper(Context context, Intent intent) {
         String action = intent.getAction();
-        Log.d("AudHub", "Loading: BroadcastReceiver: Action to " + action);
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": BroadcastReceiver: Action to " + action);
 
     }
 
@@ -53,7 +56,7 @@ public class Loading extends BaseActivity {
         // Register the BroadcastReceiver
         registerReceiver(mServerReceiver, mServerIntentFilter);
 
-        mClass = Loading.class.toString();
+        mClass_string = Loading.class.toString();
 
         pending = new ArrayList<>();
         pendingData = new Intent();
@@ -61,17 +64,15 @@ public class Loading extends BaseActivity {
 
         //Update loading message
         message_textView = (TextView) findViewById(R.id.textview_loadingMessage);
-        String loadingType = getIntent().getStringExtra(getResources().getString(R.string.extra_loading_type));
-        message_textView.setText(loadingType);
+        String loading_type = getIntent().getStringExtra(getResources().getString(R.string.extra_loading_type));
+        message_textView.setText(loading_type);
 
         running = true;
         connected_failed = false;
 
-        if (loadingType.equals(getResources().getString(R.string.loading_hub))) {
-            Configurations.addActivityToStack(ConnectToHub.class.toString());
-            Intent intent = new Intent(this, ConnectToHub.class);
-            startActivity(intent);
-            finish();
+        if (loading_type.equals(getResources().getString(R.string.loading_hub)) || loading_type.equals(getResources().getString(R.string.loading_connect_to_hub))) {
+            LoadHubThread thread = new LoadHubThread(loading_type);
+            thread.start();
         }
 
     }
@@ -80,9 +81,9 @@ public class Loading extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("AudHub", "Loading: onDestroy starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onDestroy starting...");
         running = false;
-        Log.d("AudHub", "Loading: onDestroy stopping...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onDestroy stopping...");
 
     }
 
@@ -90,12 +91,47 @@ public class Loading extends BaseActivity {
      * Updates the loading message
      */
     private void updateLoadingMessage(String message) {
-        message_textView.setText(message);
+        TextView message_textVie = (TextView) findViewById(R.id.textview_loadingMessage);
+        message_textVie.setText(message);
     }
 
 
-    private void switchToHub() {
-        Log.d("AudHub", "Loading: SwitchToHub");
+    /**
+     * Initialize the hub
+     */
+    private class LoadHubThread extends Thread {
+        private final String loading_type;
+        public LoadHubThread(String l_t) {
+            loading_type = l_t;
+        }
+
+        public void run() {
+            Iterator<String> message = Arrays.asList(getResources().getStringArray(R.array.loading_hub_message)).iterator();
+
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is running");
+            //updateLoadingMessage(message.next());
+
+            try {
+                sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            //updateLoadingMessage(message.next());
+            if (loading_type.equals(getResources().getString(R.string.loading_hub))) {
+                gotoHub_helper();
+            }
+            else if (loading_type.equals(getResources().getString(R.string.loading_connect_to_hub))) {
+                gotoConnectToHub_helper();
+            }
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is finishing");
+        }
+    }
+
+    @Override
+    protected void gotoHub_helper() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": gotoHub_helper: SwitchToHub");
+        Configurations.setController(true);
         Intent intent = new Intent(this, Hub.class);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), Loading.class.toString());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -103,8 +139,9 @@ public class Loading extends BaseActivity {
         finish();
     }
 
-    private void switchToConnHub() {
-        Log.d("AudHub", "Loading: SwitchToConnHub");
+    protected void gotoConnectToHub_helper() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": gotoConnectToHub_helper: SwitchToConnHub");
+        Configurations.setController(false);
         Intent intent = new Intent(this, ConnectToHub.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

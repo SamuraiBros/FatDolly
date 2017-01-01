@@ -121,6 +121,10 @@
     <string-array name="captions_metadata_error">
         <item>This can\'t be right...</item>
     </string-array>
+    <string-array name="loading_hub_message">
+        <item>Configuring Changes...</item>
+        <item>Starting Hub...</item>
+    </string-array>
     <string-array name="theme_array">
         <item>Blue</item>
         <item>Orange</item>

@@ -43,7 +43,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected WifiP2pDnsSdServiceInfo serviceInfo;
     //Reference to the screen that called notifications
     protected Class<?> prev_screen;
-    protected String mClass;
+    protected String mClass_string;
 
     //Reference to notifications button
     protected Button button_notifications;
@@ -82,7 +82,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d("AudHub", "BaseActivity: BroadcastReceiver: Action to " + action);
+            Log.d(getResources().getString(R.string.app_name), "BaseActivity: BroadcastReceiver: Action to " + action);
             //Checks to see if bluetooth on/off status changes
             if (action.equals("")) {
             }
@@ -179,19 +179,21 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void removeRegistration() {
-        mManager.removeLocalService(mChannel, serviceInfo, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                // Command successful! Code isn't necessarily needed here,
-                // Unless you want to update the UI or add logging statements.
-                Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: success");
-            }
+        if (serviceInfo != null) {
+            mManager.removeLocalService(mChannel, serviceInfo, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    // Command successful! Code isn't necessarily needed here,
+                    // Unless you want to update the UI or add logging statements.
+                    Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: success");
+                }
 
-            @Override
-            public void onFailure(int arg0) {
-                Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: failed");
-            }
-        });
+                @Override
+                public void onFailure(int arg0) {
+                    Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: failed");
+                }
+            });
+        }
     }
 
     /**
@@ -235,7 +237,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         });
 
-        if (mClass.equals(Hub.class.toString()) || mClass.equals(ConnectToHub.class.toString()) || mClass.equals(Loading.class.toString())) {
+        if (mClass_string.equals(Hub.class.toString()) || mClass_string.equals(ConnectToHub.class.toString()) || mClass_string.equals(Loading.class.toString())) {
             // Displays the dialogue
             alertDialog.show();
         }
@@ -246,13 +248,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void onBackPressed_helper() {
-        if (mClass.equals(Loading.class.toString()) || mClass.equals(ConnectToHub.class.toString()) || mClass.equals(Hub.class.toString())) {
-
+        if (mClass_string.equals(Loading.class.toString()) || mClass_string.equals(ConnectToHub.class.toString()) || mClass_string.equals(Hub.class.toString())) {
+            close(Home.class);
         } else {
             //Retrieves the reference to the calling activity class
             String class_name = Configurations.getPreviousActivity();
             if (class_name != null) {
-                Log.d("AudHub", "BaseActivity: Sender Class: " + class_name);
+                Log.d(getResources().getString(R.string.app_name), "BaseActivity: Sender Class: " + class_name);
             }
             Class last_screen = null;
             if (class_name != null && !class_name.equals("")) {
@@ -380,8 +382,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void gotoConnDevices (View view) {
         Intent intent = new Intent(this, ConnectedDevices.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
@@ -393,8 +395,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void gotoRequests (View view) {
         Intent intent = new Intent(this, PlaybackRequests.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
@@ -405,24 +407,24 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void gotoConnUsers (View view) {
         Intent intent = new Intent(this, ConnectedUsers.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
 
     public void gotoNotifications(View view) {
         Intent intent = new Intent(this, Notifications.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
 
     public void gotoSettings(View view) {
         Intent intent = new Intent(this, HubSettings.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
@@ -433,8 +435,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void gotoAddDevices(View view){
         Intent intent = new Intent(this, ConnectToDevice.class);
-        Configurations.addActivityToStack(mClass);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.addActivityToStack(mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         startActivity(intent);
         finish();
     }
@@ -535,7 +537,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         });
 
         // Displays the dialogue
-        if (mClass.equals(Home.class.toString())) {
+        if (mClass_string.equals(Home.class.toString()) || mClass_string.equals(Loading.class.toString())) {
             gotoConnectToHub_helper();
         }
         else{
@@ -545,7 +547,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void gotoConnectToHub_helper() {
         Intent intent = new Intent(BaseActivity.this, Loading.class);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.setController(false);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_connect_to_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
         startActivity(intent);
@@ -579,7 +582,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         });
 
         // Displays the dialogue
-        if (mClass.equals(Home.class.toString())) {
+        if (mClass_string.equals(Home.class.toString()) || mClass_string.equals(Loading.class.toString())) {
             gotoHub_helper();
         }
         else{
@@ -589,7 +592,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void gotoHub_helper() {
         Intent intent = new Intent(BaseActivity.this, Loading.class);
-        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        Configurations.setController(true);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
         startActivity(intent);

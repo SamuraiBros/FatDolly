@@ -142,7 +142,7 @@ public class Configurations extends Application {
     //Stack to keep track of activities
     private static Stack<String> activitiesStack = new Stack<>();
     //Reference to class string
-    private final String mClass = Configurations.class.toString();
+    private final String mClass_string = Configurations.class.toString();
 
 
     /**
@@ -276,18 +276,18 @@ public class Configurations extends Application {
      * Removes a message from the queue
      * @param message
      */
-    public static void dequeueNotification(String message) {
-        Log.d("AudHub", "HubService: dequeueNotification: starting...");
+    public static void dequeueNotification(Context c, String message) {
+        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: starting...");
         //Removes selects message
         if (message != null && !message.equals("")) {
             try {
                 notificationsDataLock.acquire();
-                Log.d("AudHub", "HubService: dequeueNotification: Acquired notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Acquired notification lock");
                 newNotification = false;
                 notificationsVector.remove(message);
-                Log.d("AudHub", "HubService: dequeueNotification: Removed " + message + " from queue");
+                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Removed " + message + " from queue");
                 notificationsDataLock.release();
-                Log.d("AudHub", "HubService: dequeueNotification: Released notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Released notification lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -296,21 +296,21 @@ public class Configurations extends Application {
         else {
             try {
                 notificationsDataLock.acquire();
-                Log.d("AudHub", "HubService: dequeueNotification: Acquired notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Acquired notification lock");
                 Vector<String> messages = (Vector<String>) notificationsVector.clone();
                 for (String mess : messages) {
                     if (!mess.contains("is ")) {
-                        Log.d("AudHub", "HubService: dequeueNotification: Removed " + mess + " from queue");
+                        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Removed " + mess + " from queue");
                         notificationsVector.remove(mess);
                     }
                 }
                 notificationsDataLock.release();
-                Log.d("AudHub", "HubService: dequeueNotification: Released notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Released notification lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        Log.d("AudHub", "HubService: dequeueNotification: ended");
+        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: ended");
     }
 
     // Small utilities

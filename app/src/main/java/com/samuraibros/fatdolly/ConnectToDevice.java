@@ -32,7 +32,7 @@ public class ConnectToDevice extends BaseActivity {
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
 
-        mClass = ConnectToDevice.class.toString();
+        mClass_string = ConnectToDevice.class.toString();
 
         running = true;
 

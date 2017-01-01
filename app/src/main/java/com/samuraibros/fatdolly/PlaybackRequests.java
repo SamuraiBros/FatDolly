@@ -44,7 +44,7 @@ public class PlaybackRequests extends BaseActivity {
         setContentView(R.layout.activity_playback_requests);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass = PlaybackRequests.class.toString();
+        mClass_string = PlaybackRequests.class.toString();
 
 
         running = true;
@@ -66,7 +66,7 @@ public class PlaybackRequests extends BaseActivity {
      * @param view
      */
     public void refresh(View view) {
-        Log.d("AudHub", "PlaybackRequests: Refresh: Refreshing List...");
+        Log.d(getResources().getString(R.string.app_name), "PlaybackRequests: Refresh: Refreshing List...");
         // Initializes the adapter
         ArrayAdapter requests_arrayAdapter  =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1) {
@@ -105,14 +105,14 @@ public class PlaybackRequests extends BaseActivity {
             int start_time = Configurations.requestsStructureToStart(structure);
             int curr_time = Calendar.getInstance().get(Calendar.SECOND);
             int time_diff = (curr_time - start_time) * 1000;
-            Log.d("AudHub", "PlaybackRequests:Displaying request: Time difference: " + Integer.toString(time_diff));
+            Log.d(getResources().getString(R.string.app_name), "PlaybackRequests:Displaying request: Time difference: " + Integer.toString(time_diff));
             duration -= time_diff;
             Configurations.setRequestStructureIndex(idx, structure);
             requests_arrayAdapter.add(name + request);
             idx++;
         }
         if (current_dialog != null && current_dialog.isShowing()) {
-            Log.d("AudHub", "PlaybackRequests: Refresh: Refreshing dialog...");
+            Log.d(getResources().getString(R.string.app_name), "PlaybackRequests: Refresh: Refreshing dialog...");
             String structure = currentDialogStructureMap.get(current_dialog);
             final String[] selection = new String[Configurations.REQUEST_PLAYBACK_CHOICES.length];
             ArrayList<String> responses = Configurations.requestStructureToResponse(structure);
