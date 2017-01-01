@@ -31,12 +31,17 @@ public class Home extends BaseActivity {
     // Tells if permissions granted
     private static boolean permissionsGranted = true;
 
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = Home.class.toString();
 
         permissionsGranted = true;

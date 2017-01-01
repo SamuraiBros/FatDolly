@@ -33,13 +33,19 @@ public class PlaybackRequests extends BaseActivity {
     //Current displayed arraylist
     private Map<AlertDialog, String> currentDialogStructureMap = new HashMap<>();
 
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_requests);
 
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = PlaybackRequests.class.toString();
+
 
         running = true;
 

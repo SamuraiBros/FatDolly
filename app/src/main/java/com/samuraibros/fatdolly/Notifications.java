@@ -23,13 +23,18 @@ public class Notifications extends BaseActivity {
     ListView notifications_listView;
     //Determines whether activity is running
     public static boolean running = false;
-    
+
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = Notifications.class.toString();
 
         Log.d("AudHub", "Notifications: onCreate: starting...");

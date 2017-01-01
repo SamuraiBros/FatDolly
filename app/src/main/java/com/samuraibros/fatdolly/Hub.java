@@ -47,6 +47,10 @@ public class Hub extends BaseActivity {
     //Determines if Hub has been previously started
     public static boolean started = false;
 
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,7 @@ public class Hub extends BaseActivity {
         setContentView(R.layout.activity_hub);
 
         //Get the needed configurations items
-
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = Hub.class.toString();
 
         Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
@@ -104,8 +108,8 @@ public class Hub extends BaseActivity {
             @Override
             public void onClick(View v) {
                 ArrayList<String> permissions = new ArrayList<>();
-                /*if (!PreferenceUtility.isController(Hub.this)) {
-                    String controllerAddress = PreferenceUtility.getControllerAddress(Hub.this);
+                if (!Configurations.isController()) {
+                    String controllerAddress = Configurations.getControllerAddress();
                     permissions = Configurations.userAddressToPermissions(controllerAddress);
                 }
                 boolean playBackControl = permissions.contains(getResources().getString(R.string.permission_control_playback));
@@ -114,7 +118,7 @@ public class Hub extends BaseActivity {
                 }
                 else {
                     playBackRequest(Hub.this);
-                }*/
+                }
             }
         });
         mediaControlButtons[1] = (Button) findViewById(R.id.button_pause);

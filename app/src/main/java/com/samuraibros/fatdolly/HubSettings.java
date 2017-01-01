@@ -22,13 +22,17 @@ public class HubSettings extends BaseActivity {
     //Determines whether activity is running
     public static boolean running = false;
 
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hub_settings);
-        
 
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = HubSettings.class.toString();
 
         final EditText hubName_editText = (EditText) findViewById(R.id.edittext_hubName);

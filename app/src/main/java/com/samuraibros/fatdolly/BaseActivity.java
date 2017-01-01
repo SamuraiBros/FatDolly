@@ -35,6 +35,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected WifiP2pManager.Channel mChannel;
     protected BroadcastReceiver mReceiver;
     protected IntentFilter mIntentFilter;
+    protected IntentFilter mServerIntentFilter;
     protected WifiP2pManager.PeerListListener mPeerListListener;
     protected WifiP2pDnsSdServiceRequest serviceRequest;
 
@@ -71,6 +72,23 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     };*/
 
+    /**
+     * Listens for "RefreshConnectedUsers" intents
+     * @param
+     */
+    protected final BroadcastReceiver mServerReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d("AudHub", "BaseActivity: BroadcastReceiver: Action to " + action);
+            //Checks to see if bluetooth on/off status changes
+            if (action.equals("")) {
+            }
+        }
+
+    };
+
+    protected abstract void onReceive_helper(Context context, Intent intent);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +103,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+        mServerIntentFilter = new IntentFilter();
 
         //Retrieves the reference to the calling activity class
         String class_name = getIntent().getStringExtra(getResources().getString(R.string.extra_sender_class));

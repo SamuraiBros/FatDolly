@@ -54,7 +54,12 @@
         <activity android:name=".HubSettings" />
         <activity android:name=".Notifications" />
         <activity android:name=".PlaybackRequests" />
-        <activity android:name=".ConnectToHub"></activity>
+        <activity android:name=".ConnectToHub" />
+        <activity
+            android:name=".ConnectedUsers"
+            android:label="@string/title_activity_connected_users"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ConnectedDevices"></activity>
     </application>
 
 </manifest>

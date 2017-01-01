@@ -34,10 +34,16 @@ public class ConnectToHub extends BaseActivity {
     protected ListView connectToHub_listView;
 
     @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_hub);
 
+        registerReceiver(mReceiver, mServerIntentFilter);
         mClass = ConnectToHub.class.toString();
 
         running = true;
