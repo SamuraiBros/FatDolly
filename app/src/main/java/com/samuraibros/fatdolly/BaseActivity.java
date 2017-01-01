@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -21,6 +22,8 @@ import java.util.Map;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
+    //Preferences ID
+    public static final String PREFERENCES_ID = "AUDHUB";
     protected WifiP2pManager mManager;
     protected WifiP2pManager.Channel mChannel;
     protected BroadcastReceiver mReceiver;
@@ -88,7 +91,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     private void startRegistration() {
         //  Create a string map containing information about your service.
         Map record = new HashMap();
-        record.put("buddyname", "John Doe" + (int) (Math.random() * 1000));
+        SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
+        String hubName = mPreferences.getString("HubName", "");
+        record.put("HubName", hubName);
 
         // Service information.  Pass it an instance name, service type
         // _protocol._transportlayer , and the map containing

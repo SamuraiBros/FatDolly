@@ -27,7 +27,7 @@ public class ConnectToPeer extends BaseActivity {
     private ArrayAdapter peerDevices_arrayAdapter;
     private ListView peerDevices_listView;
     private Map<String, String> peerNametoAddress_map = new HashMap<>();
-    private final HashMap<String, String> buddies = new HashMap<String, String>();
+    private final HashMap<String, String> peerHubs = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +41,8 @@ public class ConnectToPeer extends BaseActivity {
                 peerNametoAddress_map.clear();
                 peerDevices_arrayAdapter.clear();
                 for (WifiP2pDevice dev : peers.getDeviceList()) {
-                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && buddies.containsKey(dev.deviceAddress))
-                        peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
+                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress))
+                        peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
                 }
                 peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
             }
@@ -59,7 +59,7 @@ public class ConnectToPeer extends BaseActivity {
             public void onDnsSdTxtRecordAvailable(
                     String fullDomain, Map record, WifiP2pDevice device) {
                 Log.d(getResources().getString(R.string.app_name), this.toString() + ": DnsSdTxtRecord available -" + record.toString());
-                buddies.put(device.deviceAddress, (String) record.get("buddyname"));
+                peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hubName)));
                 refreshPeers(null);
             }
         };
@@ -71,8 +71,8 @@ public class ConnectToPeer extends BaseActivity {
 
                 // Update the device name with the human-friendly version from
                 // the DnsTxtRecord, assuming one arrived.
-                resourceType.deviceName = buddies
-                        .containsKey(resourceType.deviceAddress) ? buddies
+                resourceType.deviceName = peerHubs
+                        .containsKey(resourceType.deviceAddress) ? peerHubs
                         .get(resourceType.deviceAddress) : resourceType.deviceName;
 
                 // Add to the custom adapter defined specifically for showing
