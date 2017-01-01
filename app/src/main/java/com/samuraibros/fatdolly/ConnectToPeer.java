@@ -41,11 +41,10 @@ public class ConnectToPeer extends BaseActivity {
                 peerNametoAddress_map.clear();
                 peerDevices_arrayAdapter.clear();
                 for (WifiP2pDevice dev : peers.getDeviceList()) {
-                    if (!peerNametoAddress_map.containsKey(dev.deviceName))
+                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && buddies.containsKey(dev.deviceAddress))
                         peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
                 }
-                //peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
-                peerDevices_arrayAdapter.addAll(buddies.keySet());
+                peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
             }
         };
 
@@ -61,6 +60,7 @@ public class ConnectToPeer extends BaseActivity {
                     String fullDomain, Map record, WifiP2pDevice device) {
                 Log.d(getResources().getString(R.string.app_name), this.toString() + ": DnsSdTxtRecord available -" + record.toString());
                 buddies.put(device.deviceAddress, (String) record.get("buddyname"));
+                refreshPeers(null);
             }
         };
 
