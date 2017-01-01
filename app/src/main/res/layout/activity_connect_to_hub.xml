@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@android:color/background_dark"
+    tools:context="com.samuraibros.fatdolly.ConnectToHub">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Connect to New Hub"
+        android:id="@+id/textview_hubName"
+        android:layout_alignParentTop="true"
+        android:textColor="@android:color/white"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@mipmap/ic_otherhub"
+        android:id="@+id/button_topRight"
+        android:layout_gravity="start"
+        android:onClick="gotoHub" />
+
+    <Button
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/button_notifications"
+        android:layout_gravity="end"
+        android:background="@mipmap/ic_notifications"
+        android:onClick="gotoNotifications" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Find your musical mate"
+        android:textColor="@android:color/white"
+        android:id="@+id/textview_caption"
+        android:layout_below="@+id/textview_hubName"
+        android:layout_centerHorizontal="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listview_connectToHub"
+        android:layout_below="@+id/textview_caption"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="49dp" />
+
+    <Button
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@mipmap/ic_refresh"
+        android:id="@+id/button_hub_refresh"
+        android:layout_alignParentBottom="true"
+        android:onClick="refresh"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

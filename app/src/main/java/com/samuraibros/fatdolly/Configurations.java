@@ -271,6 +271,105 @@ public class Configurations extends Application {
         }
     }
 
+    // Manage Notifications
+    /**
+     * Removes a message from the queue
+     * @param message
+     */
+    public static void dequeueNotification(String message) {
+        Log.d("AudHub", "HubService: dequeueNotification: starting...");
+        //Removes selects message
+        if (message != null && !message.equals("")) {
+            try {
+                notificationsDataLock.acquire();
+                Log.d("AudHub", "HubService: dequeueNotification: Acquired notification lock");
+                newNotification = false;
+                notificationsVector.remove(message);
+                Log.d("AudHub", "HubService: dequeueNotification: Removed " + message + " from queue");
+                notificationsDataLock.release();
+                Log.d("AudHub", "HubService: dequeueNotification: Released notification lock");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //Removes all messages that don't require user response
+        else {
+            try {
+                notificationsDataLock.acquire();
+                Log.d("AudHub", "HubService: dequeueNotification: Acquired notification lock");
+                Vector<String> messages = (Vector<String>) notificationsVector.clone();
+                for (String mess : messages) {
+                    if (!mess.contains("is ")) {
+                        Log.d("AudHub", "HubService: dequeueNotification: Removed " + mess + " from queue");
+                        notificationsVector.remove(mess);
+                    }
+                }
+                notificationsDataLock.release();
+                Log.d("AudHub", "HubService: dequeueNotification: Released notification lock");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d("AudHub", "HubService: dequeueNotification: ended");
+    }
+
+    // Manage Requests
+
+
+    /**
+     * Returns the creator address of a request
+     * @param structure
+     * @return
+     */
+    public static String requestsStructureToAddress(String structure) {
+        String[] tokens = structure.split("-");
+        String address = tokens[0];
+        return address;
+    }
+
+    /**
+     * Returns the request type of a request
+     * @param structure
+     * @return
+     */
+    public static String requestsStructureToType(String structure) {
+        String[] tokens = structure.split("-");
+        String requestType = tokens[1];
+        return requestType;
+    }
+
+    /**
+     * Returns the request made
+     * @param structure
+     * @return
+     */
+    public static String requestsStructureToRequest(String structure) {
+        String[] tokens = structure.split("-");
+        String request = tokens[2];
+        return request;
+    }
+
+    /**
+     * Returns the selected duration of the request
+     * @param structure
+     * @return
+     */
+    public static int requestsStructureToDuration(String structure) {
+        String[] tokens = structure.split("-");
+        int duration = Integer.parseInt(tokens[3].split(" ")[0]) * 1000;
+        return duration;
+    }
+
+    /**
+     * Returns when the request was started
+     * @param structure
+     * @return
+     */
+    public static int requestsStructureToStart(String structure) {
+        String[] tokens = structure.split("-");
+        int start_time = Integer.parseInt(tokens[4]);
+        return start_time;
+    }
 
     // Accessors
 

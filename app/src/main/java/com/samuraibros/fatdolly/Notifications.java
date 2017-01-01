@@ -68,8 +68,8 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Configurations.dequeueNotification(message);
-                            Intent intent = new Intent(Notifications.this, Loading.class);
+                            Configurations.dequeueNotification(message);
+                            /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_switch_control));
                             intent.putExtra(getResources().getString(R.string.extra_requester_address), sender);
@@ -84,7 +84,7 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_take));
                             i.putExtra(getResources().getString(R.string.extra_requester_address), sender);
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
@@ -92,7 +92,7 @@ public class Notifications extends BaseActivity {
                             sendBroadcast(i);
                             Configurations.dequeueNotification(message);
                             refresh(null);
-                            close(prev_screen);*/
+                            close(prev_screen);
                         }
                     });
                 }
@@ -100,8 +100,8 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                           /* Configurations.dequeueNotification(message);
-                            Intent intent = new Intent(Notifications.this, Loading.class);
+                            Configurations.dequeueNotification(message);
+                            /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_waiting_for_users));
                             intent.putExtra(getResources().getString(R.string.extra_requester_address), sender);
@@ -116,7 +116,7 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_share));
                             i.putExtra(getResources().getString(R.string.extra_requester_address), sender);
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
@@ -124,7 +124,7 @@ public class Notifications extends BaseActivity {
                             sendBroadcast(i);
                             Configurations.dequeueNotification(message);
                             refresh(null);
-                            close(prev_screen);*/
+                            close(prev_screen);
                         }
                     });
                 }
@@ -132,8 +132,8 @@ public class Notifications extends BaseActivity {
                     // Accepts the request
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_accept), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Configurations.dequeueNotification(message);
-                            Intent intent = new Intent(Notifications.this, Loading.class);
+                            Configurations.dequeueNotification(message);
+                            /*Intent intent = new Intent(Notifications.this, Loading.class);
                             intent.putExtra(getResources().getString(R.string.extra_sender_class), Notifications.class.toString());
                             intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_switch_control));
                             intent.putExtra(getResources().getString(R.string.extra_requester_address), sender);
@@ -148,13 +148,13 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_give));
                             i.putExtra(getResources().getString(R.string.extra_accept), false);
                             sendBroadcast(i);
                             Configurations.dequeueNotification(message);
                             refresh(null);
-                            close(prev_screen);*/
+                            close(prev_screen);
                         }
                     });
                 }
@@ -162,8 +162,8 @@ public class Notifications extends BaseActivity {
                     // Clear Notifications list
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_clear), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            /*Configurations.dequeueNotification(message);
-                            refresh(null);*/
+                            Configurations.dequeueNotification(message);
+                            refresh(null);
                         }
                     });
                 }
@@ -211,7 +211,7 @@ public class Notifications extends BaseActivity {
 
         // Connects the list view to the adapter
         notifications_listView.setAdapter(notifications_arrayAdapter);
-        //Configurations.dequeueNotification(null);
+        Configurations.dequeueNotification(null);
         // Loop through connected users and add the name and address to the list
         for (String mess : Configurations.getNotifications()) {
             notifications_arrayAdapter.add(mess);

@@ -52,7 +52,9 @@
 
         <activity android:name=".Hub" />
         <activity android:name=".HubSettings" />
-        <activity android:name=".Notifications"></activity>
+        <activity android:name=".Notifications" />
+        <activity android:name=".PlaybackRequests" />
+        <activity android:name=".ConnectToHub"></activity>
     </application>
 
 </manifest>
