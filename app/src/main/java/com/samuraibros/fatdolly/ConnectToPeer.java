@@ -213,11 +213,13 @@ public class ConnectToPeer extends BaseActivity {
             @Override
             public void onSuccess() {
                 //success logic
+                Log.d("FatDolly", "Connected to Peer");
             }
 
             @Override
             public void onFailure(int reason) {
                 //failure logic
+                Log.d("FatDolly", "Failed to connect to Peer");
             }
         });
     }
