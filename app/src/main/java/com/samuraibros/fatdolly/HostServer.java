@@ -1,6 +1,8 @@
 package com.samuraibros.fatdolly;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 /**
@@ -9,6 +11,11 @@ import android.os.Bundle;
 
 public class HostServer extends BaseActivity{
     //FileServerAsyncTask serverAsyncTask;
+
+    @Override
+    protected void onReceive_helper(Context context, Intent intent) {
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

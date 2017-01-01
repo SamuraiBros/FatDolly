@@ -17,6 +17,7 @@ import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -24,6 +25,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +40,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected IntentFilter mServerIntentFilter;
     protected WifiP2pManager.PeerListListener mPeerListListener;
     protected WifiP2pDnsSdServiceRequest serviceRequest;
-
+    protected WifiP2pDnsSdServiceInfo serviceInfo;
     //Reference to the screen that called notifications
     protected Class<?> prev_screen;
     protected String mClass;
@@ -59,7 +61,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            HubService.LocalBinder binder = (HubService.LocalBinder) service;
+            Configurations.LocalBinder binder = (Configurations.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
             Log.d(getResources().getString(R.string.app_name), "Hub: onServiceConnected...");
@@ -103,6 +105,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        registerReceiver(mReceiver, mIntentFilter);
 
         mServerIntentFilter = new IntentFilter();
 
@@ -120,9 +123,8 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         }
 
-        startRegistration();
         //Service bindning to ensure that service does not continue in background after closing
-        /*Intent i = new Intent(this, HubService.class);
+        /*Intent i = new Intent(this, Configurations.class);
         bindService(i, MyHubService_Conn, Context.BIND_AUTO_CREATE);*/
     }
 
@@ -139,7 +141,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         unregisterReceiver(mReceiver);
     }
 
-    private void startRegistration() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mServerReceiver);
+    }
+
+    protected void startRegistration() {
         //  Create a string map containing information about your service.
         Map record = new HashMap();
         SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
@@ -149,7 +157,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         // Service information.  Pass it an instance name, service type
         // _protocol._transportlayer , and the map containing
         // information other devices will want once they connect to this one.
-        WifiP2pDnsSdServiceInfo serviceInfo =
+        serviceInfo =
                 WifiP2pDnsSdServiceInfo.newInstance("FatDollySerVice", "_presence._tcp", record);
 
         // Add the local service, sending the service info, network channel,
@@ -170,21 +178,36 @@ public abstract class BaseActivity extends AppCompatActivity {
         });
     }
 
+    protected void removeRegistration() {
+        mManager.removeLocalService(mChannel, serviceInfo, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                // Command successful! Code isn't necessarily needed here,
+                // Unless you want to update the UI or add logging statements.
+                Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: success");
+            }
+
+            @Override
+            public void onFailure(int arg0) {
+                Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: failed");
+            }
+        });
+    }
+
     /**
      * Closes and opens given activity
      * @param
      */
     protected void close (Class c){
         Intent intent;
-        /*if (c == Loading.class || c == null) {
+        if (c == Loading.class || c == null) {
             intent = new Intent(this, Home.class);
         }
         else {
             intent = new Intent(this, c);
         }
         startActivity(intent);
-        finish();
-        */
+        finish();        
     }
 
     /**
@@ -201,36 +224,51 @@ public abstract class BaseActivity extends AppCompatActivity {
         // Removes the device from the connected state and removes it from the list view
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-
-                /*if (mClass.equals(Loading.class.toString()) || mClass.equals(ConnectToHub.class.toString()) || mClass.equals(Hub.class.toString())) {
-                    Intent i = new Intent(getResources().getString(R.string.intent_internal_closure));
-                    sendBroadcast(i);
-                    close(Home.class);
-                } else {
-                    //Retrieves the reference to the calling activity class
-                    String class_name = HubService.getPreviousActivity();
-                    if (class_name != null) {
-                        Log.d(getResources().getString(R.string.app_name), "BaseActivity: Sender Class: " + class_name);
-                    }
-                    Class last_screen = null;
-                    if (class_name != null && !class_name.equals("")) {
-                        try {
-                            String[] tokens = class_name.split(" ");
-                            last_screen = Class.forName(tokens[tokens.length - 1]);
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    close(last_screen);
-                }*/
+                onBackPressed_helper();
             }
         });
+
+        // Cancels the popup dialogue
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.cancel();
+            }
+        });
+
+        if (mClass.equals(Hub.class.toString()) || mClass.equals(ConnectToHub.class.toString()) || mClass.equals(Loading.class.toString())) {
+            // Displays the dialogue
+            alertDialog.show();
+        }
+        else {
+            onBackPressed_helper();
+        }
+
+    }
+
+    private void onBackPressed_helper() {
+        if (mClass.equals(Loading.class.toString()) || mClass.equals(ConnectToHub.class.toString()) || mClass.equals(Hub.class.toString())) {
+
+        } else {
+            //Retrieves the reference to the calling activity class
+            String class_name = Configurations.getPreviousActivity();
+            if (class_name != null) {
+                Log.d("AudHub", "BaseActivity: Sender Class: " + class_name);
+            }
+            Class last_screen = null;
+            if (class_name != null && !class_name.equals("")) {
+                try {
+                    String[] tokens = class_name.split(" ");
+                    last_screen = Class.forName(tokens[tokens.length - 1]);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            close(last_screen);
+        }
     }
 
     public void clearRequests(View view) {
-        //HubService.removePlaybackRequests();
-        //refresh(null);
-        Intent i = new Intent(getResources().getString(R.string.intent_clearPlaybackRequests));
+        Intent i = new Intent(getResources().getString(R.string.intent_clear_playback_requests));
         sendBroadcast(i);
     }
 
@@ -239,21 +277,21 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param context of the bound activity
      */
     public void playBackRequest(final Context context) {
-        /*Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: starting...");
+        Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: starting...");
         ArrayList<String> permissions = new ArrayList<>();
         //Get the permissions
-        if (!HubService.isController()) {
-            String controllerAddress = HubService.getControllerAddress();
-            permissions = HubService.userAddressToPermissions(controllerAddress);
+        if (!Configurations.isController()) {
+            String controllerAddress = Configurations.getControllerAddress();
+            permissions = Configurations.userAddressToPermissions(controllerAddress);
         }
 
         //Check if the Request Playback permission is given
         boolean playBackRequest = permissions.contains(getResources().getString(R.string.permission_request_playback));
 
         //If has apprpriate permissions, create the request
-        if ((playBackRequest || HubService.isController()) && !HubService.getUserAddresses().isEmpty()) {
+        if ((playBackRequest || Configurations.isController()) && !Configurations.getUserAddresses().isEmpty()) {
             final ArrayList<String> structure = new ArrayList<>();
-            structure.add(HubService.getHubAddress());
+            structure.add(Configurations.getHubAddress());
             final ArrayList<String> response = new ArrayList<>();
 
             // Creates a popup dialog to provide further choices for a response
@@ -269,7 +307,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     int time = Calendar.getInstance().get(Calendar.SECOND);
                     structure.add(Integer.toString(time));
                     Intent i = new Intent(getResources().getString(R.string.intent_create_playback_request));
-                    i.putExtra(getResources().getString(R.string.extra_device_address), HubService.getHubAddress());
+                    i.putExtra(getResources().getString(R.string.extra_device_address), Configurations.getHubAddress());
                     String struct = TextUtils.join("-", structure);
                     i.putExtra(getResources().getString(R.string.extra_structure), struct);
                     i.putExtra(getResources().getString(R.string.extra_response), response.get(0));
@@ -281,7 +319,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             // Creates a popup dialog to provide further choices for a response
             final AlertDialog.Builder playbackTypeDialog_builder = new AlertDialog.Builder(context);
-            final String[] playback_types = HubService.REQUEST_PLAYBACK_OPTIONS;
+            final String[] playback_types = Configurations.REQUEST_PLAYBACK_OPTIONS;
 
             playbackTypeDialog_builder.setTitle("What would you like to happen?");
             playbackTypeDialog_builder.setItems(playback_types, new DialogInterface.OnClickListener() {
@@ -310,7 +348,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             requestTypeDialog.show();
         }
         //Notifies user that there are no users connected
-        else if (HubService.getUserAddresses().isEmpty()) {
+        else if (Configurations.getUserAddresses().isEmpty()) {
             // Creates a popup dialog to provide further choices for a response
             final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(context);
 
@@ -333,7 +371,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             // Displays the dialogue
             dialog.show();
         }
-        Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: ended...");*/
+        Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: ended...");
     }
 
     /**
@@ -341,23 +379,24 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void gotoConnDevices (View view) {
-        /*Intent intent = new Intent(this, ConnectedDevices.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, ConnectedDevices.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
+
 
     /**
      * Switches to the requests screen when the button is pressed
      * @param view
      */
     public void gotoRequests (View view) {
-        /*Intent intent = new Intent(this, PlaybackRequests.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, PlaybackRequests.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     /**
@@ -365,27 +404,27 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void gotoConnUsers (View view) {
-        /*Intent intent = new Intent(this, ConnectedUsers.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, ConnectedUsers.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     public void gotoNotifications(View view) {
-        /*Intent intent = new Intent(this, Notifications.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, Notifications.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     public void gotoSettings(View view) {
-        /*Intent intent = new Intent(this, HubSettings.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, HubSettings.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     /**
@@ -393,21 +432,21 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void gotoAddDevices(View view){
-        /*Intent intent = new Intent(this, ConnectToDevice.class);
-        HubService.addActivityToStack(mClass);
+        Intent intent = new Intent(this, ConnectToDevice.class);
+        Configurations.addActivityToStack(mClass);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     /**
      * Start button animation
      */
     public void newNotification() {
-        /*HubService.mVibrator.vibrate(500);
+        Configurations.mVibrator.vibrate(500);
         button_notifications = (Button) findViewById(R.id.button_notifications);
         if (button_notifications != null) {
-            button_notifications.startAnimation(HubService.notificationsAnimation);
+            button_notifications.startAnimation(Configurations.notificationsAnimation);
             button_notifications.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
@@ -415,7 +454,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     gotoNotifications(null);
                 }
             });
-        }*/
+        }
     }
 
     /**
@@ -467,5 +506,93 @@ public abstract class BaseActivity extends AppCompatActivity {
         i.putExtra("Type", "DevicesUsers");
         sendBroadcast(i);
         close(Home.class);
+    }
+
+    /**
+     * Switches to the Connected Users screen when the button is pressed
+     * @param view
+     */
+    public void gotoConnectToHub (View view) {
+        // Creates a popup dialog to provide further choices for a response
+        final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
+
+        // Sets the title for the popup dialog
+        alertDialog.setTitle("Connect to Other Hub");
+        alertDialog.setMessage("Are you sure? This will disconnect all your current users and devices!");
+
+        // Switches to hub
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                gotoConnectToHub_helper();
+            }
+        });
+
+        // Stays in current hub
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.cancel();
+            }
+        });
+
+        // Displays the dialogue
+        if (mClass.equals(Home.class.toString())) {
+            gotoConnectToHub_helper();
+        }
+        else{
+            alertDialog.show();
+        }
+    }
+
+    protected void gotoConnectToHub_helper() {
+        Intent intent = new Intent(BaseActivity.this, Loading.class);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_connect_to_hub));
+        intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Switches to the Connected Users screen when the button is pressed
+     * @param view
+     */
+    public void gotoHub (View view) {
+        // Creates a popup dialog to provide further choices for a response
+        final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
+
+        // Sets the title for the popup dialog
+        alertDialog.setTitle("Switch over to your Hub");
+        alertDialog.setMessage("Are you sure? This will disconnect you from the current hub!");
+
+        // Switches to hub
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        // Stays in current hub
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.cancel();
+            }
+        });
+
+        // Displays the dialogue
+        if (mClass.equals(Home.class.toString())) {
+            gotoHub_helper();
+        }
+        else{
+            alertDialog.show();
+        }
+    }
+
+    protected void gotoHub_helper() {
+        Intent intent = new Intent(BaseActivity.this, Loading.class);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
+        intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
+        intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
+        startActivity(intent);
+        finish();
     }
 }

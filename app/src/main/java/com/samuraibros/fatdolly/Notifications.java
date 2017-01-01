@@ -89,7 +89,7 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_control_response));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_take));
                             i.putExtra(getResources().getString(R.string.extra_requester_address), sender);
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
@@ -121,7 +121,7 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_control_response));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_share));
                             i.putExtra(getResources().getString(R.string.extra_requester_address), sender);
                             i.putExtra(getResources().getString(R.string.extra_responder_address), Configurations.getHubAddress());
@@ -153,7 +153,7 @@ public class Notifications extends BaseActivity {
                     // Declines the request
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_deny), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent i = new Intent(getResources().getString(R.string.intent_controlresponse));
+                            Intent i = new Intent(getResources().getString(R.string.intent_control_response));
                             i.putExtra(getResources().getString(R.string.extra_type), getResources().getString(R.string.value_give));
                             i.putExtra(getResources().getString(R.string.extra_accept), false);
                             sendBroadcast(i);

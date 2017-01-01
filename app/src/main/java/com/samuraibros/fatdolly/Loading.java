@@ -67,6 +67,13 @@ public class Loading extends BaseActivity {
         running = true;
         connected_failed = false;
 
+        if (loadingType.equals(getResources().getString(R.string.loading_hub))) {
+            Configurations.addActivityToStack(ConnectToHub.class.toString());
+            Intent intent = new Intent(this, ConnectToHub.class);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
 

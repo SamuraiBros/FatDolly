@@ -84,7 +84,7 @@ public class Home extends BaseActivity {
         //Checks to see if bluetooth is turned on or off
         WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         if (!wifi.isWifiEnabled()){
-            message.setText(getResources().getString(R.string.message_turnWifiOn));
+            message.setText(getResources().getString(R.string.message_turn_wifi_on));
             valid_state = false;
         }
 
@@ -106,16 +106,16 @@ public class Home extends BaseActivity {
         }
 
         if (!permissionsGranted && valid_state) {
-            message.setText(getResources().getString(R.string.message_grant_notificationlistener));
+            message.setText(getResources().getString(R.string.message_grant_notification_listener));
             valid_state = false;
         }
 
         //Check to see if name give
         SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
-        String hubName = mPreferences.getString(getResources().getString(R.string.record_hubName), "");
+        String hubName = mPreferences.getString(getResources().getString(R.string.record_hub_name), "");
 
         if ((hubName == null || hubName.trim().equals("")) && valid_state) {
-            message.setText(getResources().getString(R.string.message_setName));
+            message.setText(getResources().getString(R.string.message_set_name));
             valid_state = false;
         }
 
@@ -182,7 +182,7 @@ public class Home extends BaseActivity {
 
                 if (last_permission != Home.permissionsGranted) {
                     last_permission = Home.permissionsGranted;
-                    Intent i = new Intent(getResources().getString(R.string.intent_home_updatestatus));
+                    Intent i = new Intent(getResources().getString(R.string.intent_home_update_status));
                     sendBroadcast(i);
                 }
                 try {
@@ -221,7 +221,7 @@ public class Home extends BaseActivity {
      */
     private void checkName() {
         SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
-        final String hubName = mPreferences.getString(getResources().getString(R.string.preference_hubName), "");
+        final String hubName = mPreferences.getString(getResources().getString(R.string.preference_hub_name), "");
 
         if (hubName != null)
             Log.d(getResources().getString(R.string.app_name), "Home:CheckName: nName: " + hubName + " Length: " + Integer.toString(hubName.length()));
@@ -248,7 +248,7 @@ public class Home extends BaseActivity {
 
                     SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
                     SharedPreferences.Editor editor = mPreferences.edit();
-                    editor.putString(getResources().getString(R.string.preference_hubName), temp);
+                    editor.putString(getResources().getString(R.string.preference_hub_name), temp);
                     editor.commit();
                 }
             });
@@ -277,11 +277,7 @@ public class Home extends BaseActivity {
     public void gotoHub(View view) {
         if (permissionsGranted) {
             Log.d(getResources().getString(R.string.app_name), "Home:gotoHub: nName: " + Configurations.getHubName(this) + " Length: " + Integer.toString(Configurations.getHubName(this).length()));
-            Configurations.addActivityToStack(Hub.class.toString());
-            Configurations.setController(true);
-            Intent intent = new Intent(this, Hub.class);
-            startActivity(intent);
-            finish();
+            gotoHub_helper();
         }
         else {
             updateStatus();
@@ -295,10 +291,7 @@ public class Home extends BaseActivity {
     public void gotoAddHub(View view) {
         if (permissionsGranted) {
             Log.d(getResources().getString(R.string.app_name), "Home:gotoAddHub: nName: " + Configurations.getHubName(this) + " Length: " + Integer.toString(Configurations.getHubName(this).length()));
-            Configurations.addActivityToStack(ConnectToPeer.class.toString());
-            Intent intent = new Intent(this, ConnectToPeer.class);
-            startActivity(intent);
-            finish();
+            gotoConnectToHub_helper();
         }
         else {
             updateStatus();

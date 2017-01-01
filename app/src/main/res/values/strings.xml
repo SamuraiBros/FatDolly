@@ -1,26 +1,13 @@
 <resources>
     <string name="app_name">FatDolly</string>
-    <string name="button_connectToPeer">Connect To Peer</string>
-    <string name="message_turnWifiOn">Turn on your Wifi</string>
-    <string name="record_hubName">HubName</string>
-    <string name="textView_connectToPeer">Connect To Peer</string>
-    <string name="textView_home">Home</string>
-    <string-array name="captions_home">
-        <item>Music, unchained</item>
-    </string-array>
-    <string-array name="captions_hub">
-        <item>Music, unchained</item>
-    </string-array>
-    <string-array name="captions_metadata_error">
-        <item>This can\'t be right...</item>
-    </string-array>
     <string name="button_accept">Accept</string>
     <string name="button_blacklist">Blacklist</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_clear">Clear</string>
+    <string name="button_connect_to_peer">Connect To Peer</string>
     <string name="button_deny">Deny</string>
     <string name="button_disconnect">Disconnect</string>
-    <string name="button_give_control">Give Control</string>
+    <string name="button_giveControl">Give Control</string>
     <string name="button_no">No</string>
     <string name="button_ok">Ok</string>
     <string name="button_set_permissions">Set Permissions</string>
@@ -48,106 +35,58 @@
     <string name="extra_user_count">UserCount</string>
     <string name="extra_user_hubs">UserHubs</string>
     <string name="extra_volume">Volume</string>
-    <string name="intent_broadcastnotification">BroadcastNotification</string>
-    <string name="intent_clearPlaybackRequests">ClearPlaybackRequests</string>
-    <string name="intent_connecttohub">ConnectToHub</string>
+    <string name="intent_broadcast_notification">BroadcastNotification</string>
+    <string name="intent_clear_playback_requests">ClearPlaybackRequests</string>
+    <string name="intent_connect_to_hub">ConnectToHub</string>
     <string name="intent_connection_failure">ConnectionFailure</string>
     <string name="intent_controller_confirmation">ControllerConfirmation</string>
-    <string name="intent_controlresponse">ControlResponse</string>
-    <string name="intent_controlresult">ControlResult</string>
+    <string name="intent_control_response">ControlResponse</string>
+    <string name="intent_control_result">ControlResult</string>
     <string name="intent_create_playback_request">CreatePlaybackRequest</string>
     <string name="intent_disconnect">Disconnect</string>
     <string name="intent_disconnect_hub">DisconnectHub</string>
-    <string name="intent_home_updatestatus">Home_UpdateStatus</string>
-    <string name="intent_initialuserinformationset">InitialUserInformationSet</string>
+    <string name="intent_home_update_status">Home_UpdateStatus</string>
+    <string name="intent_initial_user_information_set">InitialUserInformationSet</string>
     <string name="intent_internal_closure">InternalClosure</string>
-    <string name="intent_newnotification">NewNotification</string>
-    <string name="intent_refreshconnectedusers">RefreshConnectedUsers</string>
-    <string name="intent_refreshPlaybackRequests">RefreshPlaybackRequests</string>
-    <string name="intent_sendremotemessage">SendRemoteMessage</string>
+    <string name="intent_new_notification">NewNotification</string>
+    <string name="intent_refresh_connected_users">RefreshConnectedUsers</string>
+    <string name="intent_refresh_playback_requests">RefreshPlaybackRequests</string>
+    <string name="intent_send_remote_message">SendRemoteMessage</string>
     <string name="intent_settings">Settings</string>
     <string name="intent_share_control_request">ShareControlRequest</string>
-    <string name="intent_startAcceptingConnections">StartAcceptingConnections</string>
+    <string name="intent_start_accepting_connections">StartAcceptingConnections</string>
     <string name="intent_switch_to_loading">SwitchToLoading</string>
-    <string name="intent_switch_to_hub">SwitchToHub</string>
-    <string name="intent_switch_to_connHub">SwitchToConnHub</string>
     <string name="intent_take_control_request">TakeControlRequest</string>
     <string name="intent_updated_user_data">UpdatedUserData</string>
     <string name="intent_updated_user_permissions">UpdatedUserPermissions</string>
-    <string name="intent_updatehubinformation">UpdateHubInformation</string>
-    <string name="intent_updateloadingmessage">UpdateLoadingMessage</string>
+    <string name="intent_update_hub_information">UpdateHubInformation</string>
+    <string name="intent_update_loading_message">UpdateLoadingMessage</string>
     <string name="intent_update_volume">UpdateVolume</string>
-    <string name="intent_userconfirmation">UserConfirmation</string>
+    <string name="intent_user_confirmation">UserConfirmation</string>
     <string name="intent_user_set_update">UserSetUpdate</string>
     <string name="intent_verify_status">VerifyStatus</string>
-    <string name="loading_switch_control">Configuring change of hub control...</string>
-    <string name="loading_give_control_request">Requesting to hand over control...</string>
-    <string name="loading_take_control_request">Requesting to take control...</string>
-    <string name="loading_share_control_request">Requesting to share control...</string>
-    <string name="loading_hub_service">Initializing resources for the Hub...</string>
-    <string name="loading_waiting_for_users">Waiting for users to connect: </string>
-    <string name="message_grant_notificationlistener">Please, grant this app permissions to access your notifications...</string>
-    <string name="message_setName">Please give your hub a name in settings...</string>
-    <string name="message_turn_bluetooth_on">Can not do anything without bluetooth, turn it on...</string>
-    <string name="message_set_name">Who are you? Set your hub name in the settings</string>
-    <string name="notification_take_control_request">&#032;is requesting to take control</string>
-    <string name="notification_share_control_request">&#032;is requesting to share control</string>
-    <string name="pending_controller_confirmation">ContorllerConfirmation</string>
-    <string name="pending_initial_conn_state">InitialConnectionState</string>
-    <string name="pending_initial_myhub_state">InitialMyHubState</string>
-    <string name="pending_initial_otherhub_state">InitialOtherHubState</string>
-    <string name="pending_user_confirmation">UserConfirmation</string>
-    <string name="pending_users_connected_state">UsersConnectedState</string>
-    <string name="pending_user_set_update">UserSetUpdate</string>
+    <string name="loading_connect_to_hub">Loading screen to allow connection to a hub...</string>
+    <string name="loading_hub">Loading the hub...</string>
+    <string name="message_grant_notification_listener">Please, grant this app permissions to access your notifications...</string>
+    <string name="message_set_name">Who are you? Please give your hub a name in settings...</string>
+    <string name="message_turn_wifi_on">Turn on your Wifi</string>
     <string name="permission_control_discoverability">Control Discoverability</string>
     <string name="permission_control_playback">Control Playback</string>
     <string name="permission_control_users">Control Users</string>
     <string name="permission_control_volume">Control Volume</string>
     <string name="permission_request_playback">Request Playback</string>
-    <string name="preference_controllerAddress">ControllerAddress</string>
-    <string name="preference_controllerName">ControllerName</string>
-    <string name="preference_hubName">HubName</string>
-    <string name="preference_isController">isController</string>
-    <string name="preference_metadataArtist">metadataArtist</string>
-    <string name="preference_metadataTitle">metadataTitle</string>
-    <string name="request_metadata_change">MetadataChange</string>
-    <string name="request_share_control">ShareControl</string>
-    <string name="request_take_control">TakeControl</string>
-    <string name="request_volume_change">VolumeChange</string>
-    <string name="request_waiting_for_useres">WaitingForUsers</string>
-    <string name="status_hubservice_acceptthread_started">HubService_AcceptThread_Started</string>
-    <string name="status_initial_conn_state">InitialConnState</string>
-    <string name="status_initial_myhub_state">InitialMyHubState</string>
-    <string name="status_initial_otherhub_state">InitialOtherHubState</string>
-    <string name="status_users_connected_state">UsersConnectedState</string>
-    <string name="title_activity_my_hub">MyHub</string>
-    <string name="title_activity_add_devices">AddDevices</string>
-    <string name="title_activity_connected_devices">ConnectedDevices</string>
-    <string name="title_activity_connected_users">ConnectedUsers</string>
-    <string name="title_activity_block_list">BlockList</string>
-    <string name="title_activity_connect_to_hub">ConnectToHub</string>
-    <string name="title_activity_other_hub">OtherHub</string>
-    <string name="title_activity_loading">Loading</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_playback_requests">PlaybackRequests</string>
-    <string-array name="theme_array">
-        <item>Blue</item>
-        <item>Orange</item>
-        <item>Purple</item>
-        <item>Green</item>
-        <item>Yellow</item>
-        <item>Orange</item>
-        <item>Black</item>
-        <item>Night</item>
-    </string-array>
+    <string name="preference_hub_name">HubName</string>
+    <string name="record_hub_name">HubName</string>
+    <string name="textView_connect_to_peer">Connect To Peer</string>
+    <string name="textView_home">Home</string>
     <string name="value_acceptor">Acceptor</string>
     <string name="value_add_connect">AddConnect</string>
-    <string name="value_ascontrollerfromuser">AsControllerFromUser</string>
-    <string name="value_asuserfromcontroller">AsUserFromController</string>
-    <string name="value_asuserfromuser">AsUserFromUser</string>
+    <string name="value_as_controller_from_user">AsControllerFromUser</string>
+    <string name="value_as_user_from_controller">AsUserFromController</string>
+    <string name="value_as_user_from_user">AsUserFromUser</string>
     <string name="value_connection">Connection</string>
-    <string name="value_controllerconfirmation">ControllerConfirmation</string>
-    <string name="value_controlresult">ControlResult</string>
+    <string name="value_controller_confirmation">ControllerConfirmation</string>
+    <string name="value_control_result">ControlResult</string>
     <string name="value_device">Device</string>
     <string name="value_disconnect">Disconnect</string>
     <string name="value_disconnect_user">DisconnectUser</string>
@@ -170,7 +109,26 @@
     <string name="value_user">User</string>
     <string name="value_user_addresses">UserAddresses</string>
     <string name="value_user_set_update">UserSetUpdate</string>
-    <string name="value_usertouser">UserToUser</string>
+    <string name="value_user_to_user">UserToUser</string>
     <string name="value_wait">Wait</string>
-    <string name="value_waitingforusers">WaitingForUsers</string>
+    <string name="value_waiting_for_users">WaitingForUsers</string>
+    <string-array name="captions_home">
+        <item>Music, unchained</item>
+    </string-array>
+    <string-array name="captions_hub">
+        <item>Music, unchained</item>
+    </string-array>
+    <string-array name="captions_metadata_error">
+        <item>This can\'t be right...</item>
+    </string-array>
+    <string-array name="theme_array">
+        <item>Blue</item>
+        <item>Orange</item>
+        <item>Purple</item>
+        <item>Green</item>
+        <item>Yellow</item>
+        <item>Orange</item>
+        <item>Black</item>
+        <item>Night</item>
+    </string-array>
 </resources>

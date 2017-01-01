@@ -61,6 +61,10 @@ public class Hub extends BaseActivity {
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = Hub.class.toString();
 
+        if (Configurations.isController())
+            startRegistration();
+        else
+            removeRegistration();
         Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
         // Update the hub name and controller info
         hubName_TextView = (TextView) findViewById(R.id.textview_hubName);
@@ -81,7 +85,7 @@ public class Hub extends BaseActivity {
             top_right.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    goToConnHub(null);
+                    gotoConnectToHub(null);
                 }
             });
         }
@@ -324,76 +328,5 @@ public class Hub extends BaseActivity {
             volume_ImageView.setAlpha(1f);
         }
 
-    }
-
-
-    /**
-     * Switches to the Connected Users screen when the button is pressed
-     * @param view
-     */
-    public void goToConnHub (View view) {
-        // Creates a popup dialog to provide further choices for a response
-        final AlertDialog alertDialog = new AlertDialog.Builder(Hub.this).create();
-
-        // Sets the title for the popup dialog
-        alertDialog.setTitle("Connect to Other Hub");
-        alertDialog.setMessage("Are you sure? This will disconnect all your current users and devices!");
-
-        // Switches to hub
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                /*Intent intent = new Intent(Hub.this, Loading.class);
-                intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
-                intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.intent_switch_to_connHub));
-                intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
-                startActivity(intent);
-                finish();*/
-            }
-        });
-
-        // Stays in current hub
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                alertDialog.cancel();
-            }
-        });
-
-        // Displays the dialogue
-        alertDialog.show();
-    }
-
-    /**
-     * Switches to the Connected Users screen when the button is pressed
-     * @param view
-     */
-    public void gotoHub (View view) {
-        // Creates a popup dialog to provide further choices for a response
-        final AlertDialog alertDialog = new AlertDialog.Builder(Hub.this).create();
-
-        // Sets the title for the popup dialog
-        alertDialog.setTitle("Switch over to your Hub");
-        alertDialog.setMessage("Are you sure? This will disconnect you from the current hub!");
-
-        // Switches to hub
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                /*Intent intent = new Intent(Hub.this, Loading.class);
-                intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass);
-                intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.intent_switch_to_hub));
-                intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
-                startActivity(intent);
-                finish();*/
-            }
-        });
-
-        // Stays in current hub
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                alertDialog.cancel();
-            }
-        });
-
-        // Displays the dialogue
-        alertDialog.show();
     }
 }

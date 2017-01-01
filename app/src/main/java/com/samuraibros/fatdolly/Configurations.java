@@ -670,7 +670,7 @@ public class Configurations extends Application {
         try {
             userDataLock.acquire();
             SharedPreferences mPreferences = c.getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
-            temp = mPreferences.getString(c.getResources().getString(R.string.preference_hubName), "");
+            temp = mPreferences.getString(c.getResources().getString(R.string.preference_hub_name), "");
             userDataLock.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -953,7 +953,7 @@ public class Configurations extends Application {
             userDataLock.acquire();
             SharedPreferences mPreferences = c.getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putString(c.getResources().getString(R.string.preference_hubName), hubName);
+            editor.putString(c.getResources().getString(R.string.preference_hub_name), hubName);
             editor.commit();
             userDataLock.release();
         } catch (InterruptedException e) {
@@ -1152,7 +1152,7 @@ public class Configurations extends Application {
 
         requestsDataLock.release();
 
-        Intent i = new Intent(getResources().getString(R.string.intent_refreshPlaybackRequests));
+        Intent i = new Intent(getResources().getString(R.string.intent_refresh_playback_requests));
     }
 
     /**
@@ -1183,13 +1183,13 @@ public class Configurations extends Application {
      * @param activity
      */
     public static void addActivityToStack(String activity) {
-        /*if (activity.equals(Loading.class.toString())) {
+        if (activity.equals(Loading.class.toString())) {
             activitiesStack.clear();
             activitiesStack.add(Home.class.toString());
         }
         else {
             activitiesStack.add(activity);
-        }*/
+        }
     }
 
     /**
@@ -1328,7 +1328,7 @@ public class Configurations extends Application {
             Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Permissions are null");
             permissions = new ArrayList<String>();
         }
-        if (type.equals(getResources().getString(R.string.value_usertouser))) {
+        if (type.equals(getResources().getString(R.string.value_user_to_user))) {
             Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 1");
             // Checks to make sure hub is not already connected to user
             if (socket == null) {
@@ -1345,20 +1345,20 @@ public class Configurations extends Application {
                 userAddressNameMap.put(address, name);
                 userAddressSocketMap.put(address, socket);
                 setUserPermissions(address, permissions, getResources().getString(R.string.value_connection), false);
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_asuserfromuser)));
+                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_user_from_user)));
                 userAddressThreadMap.get(address).start();
 
                 Intent i;
 
 
                 //Send user confirmation
-                Intent intent = new Intent(getResources().getString(R.string.intent_sendremotemessage));
+                Intent intent = new Intent(getResources().getString(R.string.intent_send_remote_message));
                 intent.putExtra(getResources().getString(R.string.extra_device_address), address);
                 intent.putExtra(getResources().getString(R.string.extra_message), getResources().getString(R.string.value_user_confirmation) + "," + mAddress + "," + getResources().getString(R.string.value_querry) + ";");
                 sendBroadcast(intent);
 
                 //Update user connection list
-                i = new Intent(getResources().getString(R.string.intent_refreshconnectedusers));
+                i = new Intent(getResources().getString(R.string.intent_refresh_connected_users));
                 sendBroadcast(i);
             }
         }
@@ -1391,11 +1391,11 @@ public class Configurations extends Application {
             //Start thread to manage user connection
             if (hostHub) {
                 Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.3");
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_ascontrollerfromuser)));
+                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_controller_from_user)));
             }
             else {
                 Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.4");
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_asuserfromuser)));
+                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_user_from_user)));
                 Intent i = new Intent("UserConfirmation");
                 sendBroadcast(i);
             }
@@ -1410,7 +1410,7 @@ public class Configurations extends Application {
             userNameAddressMaps.put(name, address);
             userAddressNameMap.put(address, name);
             setUserPermissions(address, permissions, getResources().getString(R.string.value_connection), false);
-            userAddressThreadMap.put(address, new ConnectionListenerThread(controllerSocket, getResources().getString(R.string.value_asuserfromcontroller)));
+            userAddressThreadMap.put(address, new ConnectionListenerThread(controllerSocket, getResources().getString(R.string.value_as_user_from_controller)));
             userAddressThreadMap.get(address).start();
             userAddressSocketMap.put(address, controllerSocket);
             controllerThread = userAddressThreadMap.get(address);
@@ -1419,7 +1419,7 @@ public class Configurations extends Application {
             //Update user connection list
             Intent i;
 
-            i = new Intent(getResources().getString(R.string.intent_initialuserinformationset));
+            i = new Intent(getResources().getString(R.string.intent_initial_user_information_set));
             sendBroadcast(i);
         }
         else  if (type.equals(getResources().getString(R.string.value_exists))) {

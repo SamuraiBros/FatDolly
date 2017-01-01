@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,13 +10,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@android:color/background_dark"
-    tools:context="com.samuraibros.fatdolly.ConnectedUsers">
+    tools:context="com.samuraibros.fatdolly.ConnectToDevice">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Connected Users"
+        android:text="Add a Device"
         android:id="@+id/textview_hubName"
         android:textColor="@android:color/white"
         android:layout_alignParentTop="true"
@@ -34,20 +35,30 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="It\'s not a party without some friends"
+        android:text="Because you can\'t rock out on this tiny thing"
         android:id="@+id/textview_caption"
         android:layout_below="@+id/textview_hubName"
+        android:textColor="@android:color/white"
         android:layout_centerHorizontal="true" />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:id="@+id/listview_connectedUsers"
+        android:id="@+id/listview_searchDevices"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="false"
         android:layout_below="@+id/textview_caption"
+        android:textColor="@android:color/white"
         android:layout_marginTop="10dp" />
 
+    <Button
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@mipmap/ic_refresh"
+        android:id="@+id/button_device_refresh"
+        android:layout_alignParentBottom="true"
+        android:onClick="refresh"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

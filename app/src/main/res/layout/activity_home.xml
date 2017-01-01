@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/message_turnWifiOn"
+            android:text="@string/message_turn_wifi_on"
             android:textSize="15sp"
             android:textColor="@android:color/white"
             android:id="@+id/textview_wifistatus"
