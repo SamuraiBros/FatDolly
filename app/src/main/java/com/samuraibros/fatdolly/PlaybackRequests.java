@@ -43,7 +43,7 @@ public class PlaybackRequests extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_requests);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = PlaybackRequests.class.toString();
 
 

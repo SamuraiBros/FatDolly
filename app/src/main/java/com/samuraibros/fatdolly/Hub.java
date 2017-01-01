@@ -58,7 +58,7 @@ public class Hub extends BaseActivity {
         setContentView(R.layout.activity_hub);
 
         //Get the needed configurations items
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = Hub.class.toString();
 
         Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");

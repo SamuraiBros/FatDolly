@@ -23,7 +23,7 @@ public class ConnectedDevices extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connected_devices);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = ConnectedDevices.class.toString();
 
         running = true;

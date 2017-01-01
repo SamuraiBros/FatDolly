@@ -41,7 +41,7 @@ public class Home extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = Home.class.toString();
 
         permissionsGranted = true;

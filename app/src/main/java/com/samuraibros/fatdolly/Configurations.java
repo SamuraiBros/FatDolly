@@ -313,6 +313,25 @@ public class Configurations extends Application {
         Log.d("AudHub", "HubService: dequeueNotification: ended");
     }
 
+    // Small utilities
+    /**
+     * Converts a byte array into a string representation
+     * @param b
+     */
+    public static String byteArrayToString(byte[] b)
+    {
+        return   new String(b);
+    }
+
+    /**
+     * Converts an string to a byte array representation
+     * @param s
+     */
+    public static byte[] stringToByteArray(String s)
+    {
+        return s.getBytes();
+    }
+
     // Manage Requests
 
 

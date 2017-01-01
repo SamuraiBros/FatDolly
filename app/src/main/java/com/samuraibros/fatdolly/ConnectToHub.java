@@ -43,7 +43,7 @@ public class ConnectToHub extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_hub);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = ConnectToHub.class.toString();
 
         running = true;

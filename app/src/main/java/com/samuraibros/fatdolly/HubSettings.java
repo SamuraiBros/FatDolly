@@ -32,7 +32,7 @@ public class HubSettings extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hub_settings);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = HubSettings.class.toString();
 
         final EditText hubName_editText = (EditText) findViewById(R.id.edittext_hubName);

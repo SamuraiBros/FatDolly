@@ -32,7 +32,7 @@ public class ConnectedUsers extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connected_users);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = ConnectedUsers.class.toString();
 
         Log.d("AudHub", "ConnectedUsers: onCreate: starting...");

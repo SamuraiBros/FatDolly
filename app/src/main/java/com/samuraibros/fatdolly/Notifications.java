@@ -34,7 +34,7 @@ public class Notifications extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        registerReceiver(mReceiver, mServerIntentFilter);
+        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass = Notifications.class.toString();
 
         Log.d("AudHub", "Notifications: onCreate: starting...");

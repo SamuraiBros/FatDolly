@@ -59,7 +59,8 @@
             android:name=".ConnectedUsers"
             android:label="@string/title_activity_connected_users"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ConnectedDevices"></activity>
+        <activity android:name=".ConnectedDevices" />
+        <activity android:name=".Loading"></activity>
     </application>
 
 </manifest>
