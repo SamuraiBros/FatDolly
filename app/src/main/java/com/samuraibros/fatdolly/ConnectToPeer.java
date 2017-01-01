@@ -28,6 +28,8 @@ public class ConnectToPeer extends BaseActivity {
     private ListView peerDevices_listView;
     private Map<String, String> peerNametoAddress_map = new HashMap<>();
     private final HashMap<String, String> peerHubs = new HashMap<String, String>();
+    private WifiP2pManager.DnsSdTxtRecordListener txtListener;
+    private WifiP2pManager.DnsSdServiceResponseListener servListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +39,19 @@ public class ConnectToPeer extends BaseActivity {
         mPeerListListener  = new WifiP2pManager.PeerListListener() {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peers) {
-                //Clear the map list and add the new list of name adn address pairings
+                //Clear the map list and add the new list of name and address pairings
                 boolean new_peer = false;
                 for (WifiP2pDevice dev : peers.getDeviceList()) {
-                    if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress)) {
-                        peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
+                    //if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress)) {
+                    if (!peerNametoAddress_map.containsKey(dev.deviceName)) {
+                        //Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: New peer available -" + peerHubs.get(dev.deviceAddress));
+                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: New peer available -" + dev.deviceName);
+                        //peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
+                        peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
                         new_peer = true;
+                    }
+                    else {
+                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: Old Peer or other device -" + dev.deviceName);
                     }
                 }
 
@@ -50,10 +59,14 @@ public class ConnectToPeer extends BaseActivity {
                     peerDevices_arrayAdapter.clear();
                     peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
                 }
+
+                /*if (peerNametoAddress_map.isEmpty()) {
+                    refreshPeers(null);
+                }*/
             }
         };
 
-        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+        txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
             @Override
         /* Callback includes:
          * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
@@ -61,17 +74,17 @@ public class ConnectToPeer extends BaseActivity {
          * device: The device running the advertised service.
          */
 
-            public void onDnsSdTxtRecordAvailable(
-                    String fullDomain, Map record, WifiP2pDevice device) {
-                Log.d(getResources().getString(R.string.app_name), this.toString() + ": DnsSdTxtRecord available -" + record.toString());
+            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
+                Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: DnsSdTxtRecord available -" + record.toString());
                 if (!peerHubs.keySet().contains(device.deviceAddress)) {
+                    Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: NEW DnsSdTxtRecord available -" + record.toString());
                     peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hubName)));
                     discoverService();
                 }
             }
         };
 
-        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+        servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
             @Override
             public void onDnsSdServiceAvailable(String instanceName, String registrationType,
                                                 WifiP2pDevice resourceType) {
@@ -104,11 +117,13 @@ public class ConnectToPeer extends BaseActivity {
                     @Override
                     public void onSuccess() {
                         // Success!
+                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: AddingServiceRequest Success");
                     }
 
                     @Override
                     public void onFailure(int code) {
                         // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: AddingServiceRequest Failed");
                     }
                 });
 
@@ -163,6 +178,7 @@ public class ConnectToPeer extends BaseActivity {
      */
     public void refreshPeers(View view) {
         peerNametoAddress_map.clear();
+        //peerHubs.clear();
         // Initializes the adapter
         peerDevices_arrayAdapter  =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1) {

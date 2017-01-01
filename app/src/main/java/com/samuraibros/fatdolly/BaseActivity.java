@@ -71,8 +71,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         //Service bindning to ensure that service does not continue in background after closing
         /*Intent i = new Intent(this, HubService.class);
         bindService(i, MyHubService_Conn, Context.BIND_AUTO_CREATE);*/
-
-        Log.d("AudHub", "Hub:Starting Hub: Bound Service...");
     }
 
     /* register the broadcast receiver with the intent values to be matched */
@@ -109,11 +107,12 @@ public abstract class BaseActivity extends AppCompatActivity {
             public void onSuccess() {
                 // Command successful! Code isn't necessarily needed here,
                 // Unless you want to update the UI or add logging statements.
+                Log.d(getResources().getString(R.string.app_name), "BaseActivity: startRegistration: success");
             }
 
             @Override
             public void onFailure(int arg0) {
-                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                Log.d(getResources().getString(R.string.app_name), "BaseActivity: startRegistration: failed");
             }
         });
     }
