@@ -7,25 +7,23 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.samuraibros.fatdolly.Home">
-
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_connectToPeer"
-        android:id="@+id/button_connectToPeer"
-        android:onClick="gotoConnectToPeer"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+    tools:context="com.samuraibros.fatdolly.ConnectToPeer">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/textView_home"
-        android:id="@+id/textView_home"
+        android:text="@string/textView_connectToPeer"
+        android:id="@+id/textView_connectToPeer"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView_connectToPeer"
+        android:layout_below="@+id/textView_connectToPeer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="51dp" />
 
 </RelativeLayout>
