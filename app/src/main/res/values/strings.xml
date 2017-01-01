@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">FatDolly</string>
     <string name="button_connectToPeer">Connect To Peer</string>
+    <string name="record_hubName">HubName</string>
     <string name="textView_connectToPeer">Connect To Peer</string>
     <string name="textView_home">Home</string>
 </resources>
