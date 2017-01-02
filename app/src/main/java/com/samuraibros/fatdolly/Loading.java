@@ -10,12 +10,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -106,20 +112,112 @@ public class Loading extends BaseActivity {
         }
 
         public void run() {
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is running");
             Iterator<String> message = Arrays.asList(getResources().getStringArray(R.array.loading_hub_message)).iterator();
 
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is running");
-            //updateLoadingMessage(message.next());
+            String message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            //updateLoadingMessage(message_string);
 
-            Configurations.resetConfigurations(Loading. this);
+            Configurations.resetConfigurations(Loading.this);
 
             try {
-                sleep(3000);
+                sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            //updateLoadingMessage(message.next());
+            if (Configurations.isController()) {
+                startRegistration();
+
+                while (registration_status == null) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                message_string = message.next();
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+                //updateLoadingMessage(message_string);
+
+                while (!registration_status.equals(getResources().getString(R.string.value_registration_succeeded))) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (registration_status.equals(getResources().getString(R.string.value_registration_failed))) {
+                        resetRegistration();
+                        startRegistration();
+                    }
+                }
+                resetRegistration();
+
+            } else {
+                removeRegistration();
+
+                while (registration_status == null) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                message_string = message.next();
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+                //updateLoadingMessage(message_string);
+
+                while (!registration_status.equals(getResources().getString(R.string.value_unregistration_succeeded))) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (registration_status.equals(getResources().getString(R.string.value_unregistration_failed))) {
+                        resetRegistration();
+                        startRegistration();
+                    }
+                }
+                resetRegistration();
+
+                Configurations.setControllerIP(null);
+
+                BaseActivity.mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                    @Override
+                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                        InetAddress temp = info.groupOwnerAddress;
+                        Configurations.setControllerIP(temp);
+                    }
+                });
+
+                while (Configurations.getControllerIP() == null) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            //updateLoadingMessage(message_string);
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             if (loading_type.equals(getResources().getString(R.string.loading_hub))) {
                 gotoHub_helper();
             }
@@ -133,7 +231,6 @@ public class Loading extends BaseActivity {
     @Override
     protected void gotoHub_helper() {
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": gotoHub_helper: SwitchToHub");
-        Configurations.setController(true);
         Intent intent = new Intent(this, Hub.class);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), Loading.class.toString());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -141,9 +238,9 @@ public class Loading extends BaseActivity {
         finish();
     }
 
+    @Override
     protected void gotoConnectToHub_helper() {
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": gotoConnectToHub_helper: SwitchToConnHub");
-        Configurations.setController(false);
         Intent intent = new Intent(this, ConnectToHub.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

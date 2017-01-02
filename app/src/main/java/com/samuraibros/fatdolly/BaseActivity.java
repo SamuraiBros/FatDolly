@@ -39,17 +39,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     //Preferences ID
     public static final String PREFERENCES_ID = "AUDHUB";
-    protected WifiP2pManager mManager;
-    protected WifiP2pManager.Channel mChannel;
+    protected static WifiP2pManager mManager;
+    protected static WifiP2pManager.Channel mChannel;
     protected BroadcastReceiver mReceiver;
+    protected static WifiP2pManager.PeerListListener mPeerListListener;
     protected IntentFilter mIntentFilter;
     protected IntentFilter mServerIntentFilter;
-    protected WifiP2pManager.PeerListListener mPeerListListener;
     protected WifiP2pDnsSdServiceRequest serviceRequest;
     protected WifiP2pDnsSdServiceInfo serviceInfo;
     //Reference to the screen that called notifications
     protected Class<?> prev_screen;
-    protected String mClass_string;
+    protected String mClass_string = BaseActivity.class.toString();
 
     //Reference to notifications button
     protected Button button_notifications;
@@ -69,6 +69,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected RotateAnimation rotate_animation = new RotateAnimation(0, 360,
             Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
             0.5f);
+
+    protected String registration_status;
+
+    protected final HashMap<String, String> peerHubs = new HashMap<String, String>();
+    protected WifiP2pManager.DnsSdTxtRecordListener txtListener;
+    protected WifiP2pManager.DnsSdServiceResponseListener servListener;
 
     /*Configurations mService;
     boolean mBound = false;
@@ -99,9 +105,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d(getResources().getString(R.string.app_name), "BaseActivity: BroadcastReceiver: Action to " + action);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": BroadcastReceiver: Action to " + action);
             //Checks to see if bluetooth on/off status changes
             if (action.equals("")) {
+            }
+            else {
+                onReceive_helper(context, intent);
             }
         }
 
@@ -109,27 +118,88 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected abstract void onReceive_helper(Context context, Intent intent);
 
+    public BaseActivity() {
+
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        registerReceiver(mReceiver, mIntentFilter);
 
         mServerIntentFilter = new IntentFilter();
+
+        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mPeerListListener = new WifiP2pManager.PeerListListener() {
+            @Override
+            public void onPeersAvailable(WifiP2pDeviceList peers) {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": onPeersAvailable: received...");
+                ArrayList<WifiP2pDevice> peer_list = new ArrayList<>(peers.getDeviceList());
+                Intent i = new Intent(getResources().getString(R.string.intent_on_peers_available));
+                i.putParcelableArrayListExtra(getResources().getString(R.string.extra_peer_list), peer_list);
+                sendBroadcast(i);
+            }
+        };
+        mReceiver = new WiFiDirectBroadcastReceiver();
+
+        txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+            @Override
+            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": DnsSdTxtRecord available -" + record.toString());
+                if (!peerHubs.keySet().contains(device.deviceAddress)) {
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": NEW DnsSdTxtRecord available -" + record.toString());
+                    peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hub_name)));
+                    discoverService();
+                }
+            }
+        };
+
+        servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+            @Override
+            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+                                                WifiP2pDevice resourceType) {
+
+                // Update the device name with the human-friendly version from
+                // the DnsTxtRecord, assuming one arrived.
+                resourceType.deviceName = peerHubs
+                        .containsKey(resourceType.deviceAddress) ? peerHubs
+                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+
+                // Add to the custom adapter defined specifically for showing
+                // wifi devices.
+
+                Log.d(getResources().getString(R.string.app_name), "onBonjourServiceAvailable " + instanceName);
+            }
+        };
+
+        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
+
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        mManager.addServiceRequest(mChannel,
+                serviceRequest,
+                new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        // Success!
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Success");
+                    }
+
+                    @Override
+                    public void onFailure(int code) {
+                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Failed");
+                    }
+                });
 
         //Retrieves the reference to the calling activity class
         String class_name = getIntent().getStringExtra(getResources().getString(R.string.extra_sender_class));
         if (class_name != null) {
-            Log.d(getResources().getString(R.string.app_name), "BaseActivity: Sender Class: " + class_name);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": Sender Class: " + class_name);
         }
         if (class_name != null && !class_name.equals("")) {
             try {
@@ -149,13 +219,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mReceiver, mIntentFilter);
     }
     /* unregister the broadcast receiver */
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -165,17 +233,17 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void startRegistration() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: starting...");
         //  Create a string map containing information about your service.
         Map record = new HashMap();
         SharedPreferences mPreferences = getSharedPreferences(BaseActivity.PREFERENCES_ID, 0);
-        String hubName = mPreferences.getString("HubName", "");
-        record.put("HubName", hubName);
+        String hubName = mPreferences.getString(getResources().getString(R.string.record_hub_name), "");
+        record.put(getResources().getString(R.string.record_hub_name), hubName);
 
         // Service information.  Pass it an instance name, service type
         // _protocol._transportlayer , and the map containing
         // information other devices will want once they connect to this one.
-        serviceInfo =
-                WifiP2pDnsSdServiceInfo.newInstance("FatDollySerVice", "_presence._tcp", record);
+        serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("FatDollySerVice", "_presence._tcp", record);
 
         // Add the local service, sending the service info, network channel,
         // and listener that will be used to indicate success or failure of
@@ -185,32 +253,81 @@ public abstract class BaseActivity extends AppCompatActivity {
             public void onSuccess() {
                 // Command successful! Code isn't necessarily needed here,
                 // Unless you want to update the UI or add logging statements.
-                Log.d(getResources().getString(R.string.app_name), "BaseActivity: startRegistration: success");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: success");
+                registration_status = getResources().getString(R.string.value_registration_succeeded);
             }
 
             @Override
             public void onFailure(int arg0) {
-                Log.d(getResources().getString(R.string.app_name), "BaseActivity: startRegistration: failed");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: failed");
+                registration_status = getResources().getString(R.string.value_registration_failed);
             }
         });
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: ending...");
     }
 
     protected void removeRegistration() {
-        if (serviceInfo != null) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: starting...");
+        if (serviceInfo == null) {
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: success");
+            registration_status = getResources().getString(R.string.value_unregistration_succeeded);
+        } else {
             mManager.removeLocalService(mChannel, serviceInfo, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     // Command successful! Code isn't necessarily needed here,
                     // Unless you want to update the UI or add logging statements.
-                    Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: success");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: success");
+                    registration_status = getResources().getString(R.string.value_unregistration_succeeded);
                 }
 
                 @Override
                 public void onFailure(int arg0) {
-                    Log.d(getResources().getString(R.string.app_name), "BaseActivity: removeRegistration: failed");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: failed");
+                    registration_status = getResources().getString(R.string.value_unregistration_failed);
                 }
             });
         }
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: ending...");
+    }
+
+    protected void resetRegistration() {
+        registration_status = null;
+    }
+
+    /**
+     * Used to detect available peers that are in range
+     */
+    protected void discoverService() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): starting...");
+
+        mManager.discoverServices(mChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                // Success!
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): P2P discovery success.");
+            }
+
+            @Override
+            public void onFailure(int code) {
+                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): P2P discovery failed.");
+                if (code == WifiP2pManager.P2P_UNSUPPORTED) {
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": P2P isn't supported on this device.");
+                }
+                else if (code == WifiP2pManager.BUSY) {
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": P2P is busy.");
+                }
+                else if (code == WifiP2pManager.ERROR) {
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": P2P Unknown Error.");
+                    if (code == WifiP2pManager.NO_SERVICE_REQUESTS) {
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": P2P No Service Requests.");
+                    }
+                }
+            }
+        });
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): ended...");
     }
 
     /**
@@ -271,7 +388,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             //Retrieves the reference to the calling activity class
             String class_name = Configurations.getPreviousActivity();
             if (class_name != null) {
-                Log.d(getResources().getString(R.string.app_name), "BaseActivity: Sender Class: " + class_name);
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": Sender Class: " + class_name);
             }
             Class last_screen = null;
             if (class_name != null && !class_name.equals("")) {
