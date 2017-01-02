@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.support.v7.app.AlertDialog;
@@ -39,6 +40,7 @@ public class ConnectToHub extends BaseActivity {
     protected ListView connectToHub_listView;
 
     private WifiP2pDevice mDevice;
+    private WifiP2pInfo mInfo;
     private WifiP2pConfig config = new WifiP2pConfig();
     private ArrayAdapter peerDevices_arrayAdapter;
     private ListView peerDevices_listView;
@@ -47,6 +49,8 @@ public class ConnectToHub extends BaseActivity {
     private final HashMap<String, String> peerHubs = new HashMap<String, String>();
     private WifiP2pManager.DnsSdTxtRecordListener txtListener;
     private WifiP2pManager.DnsSdServiceResponseListener servListener;
+
+
 
     @Override
     protected void onReceive_helper(Context context, Intent intent) {

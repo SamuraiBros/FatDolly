@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ public class FileServerAsyncTask extends AsyncTask<Void, Void, Void> {
 
             nis = client.getInputStream();
             Log.i("AsyncTask", "doInBackground: Socket created, streams assigned");
+            Toast.makeText(this.context, "Message Received!", Toast.LENGTH_SHORT).show();
             serverSocket.close();
 
 

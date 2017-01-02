@@ -24,6 +24,12 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -47,6 +53,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     //Reference to notifications button
     protected Button button_notifications;
+
+    //Socket for sending as client
+    Socket clientSocket = null;
+    private PrintWriter out = null;
+    private BufferedReader in = null;
+
+    //String used to store the host address
+    String host;
+
+    //Port that is being sent to
+    int port;
 
     //Animation for rotation
     protected RotateAnimation rotate_animation = new RotateAnimation(0, 360,
@@ -484,9 +501,13 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void nextSong(View view){
+        String next = "Next Song";
+        sendMessage(next);
+        /*
         Intent i = new Intent("ChangePlayback");
         i.putExtra("Change", "Next");
         sendBroadcast(i);
+        */
     }
 
     /**
@@ -598,5 +619,60 @@ public abstract class BaseActivity extends AppCompatActivity {
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
         startActivity(intent);
         finish();
+    }
+
+    private void connectWithServer() {
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Connection... ");
+        try {
+            if (clientSocket == null) {
+                clientSocket = new Socket();
+                clientSocket.bind(null);
+                clientSocket.connect((new InetSocketAddress(host, port)), 500);
+                if (clientSocket == null)
+                {
+                    Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Client Socket is NULL ");
+                }
+                out = new PrintWriter(clientSocket.getOutputStream());
+                Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Out: " + out.toString());
+                if (out == null)
+                {
+                    Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Out is NULL ");
+                }
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: In: " + in.toString());
+                if (in == null)
+                {
+                    Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: In is NULL ");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Connection Started...");
+    }
+
+    private void disConnectWithServer() {
+        if (clientSocket != null) {
+            if (clientSocket.isConnected()) {
+                try {
+                    in.close();
+                    out.close();
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void sendMessage(String message) {
+        Log.d(getResources().getString(R.string.app_name), "Hub:Send a Message: Start Sending... " + message);
+        if (message != null) {
+            connectWithServer();
+            out.write(message);
+            out.flush();
+            disConnectWithServer();
+        }
+        Log.d(getResources().getString(R.string.app_name), "Hub:Send a Message: Done Sending...");
     }
 }
