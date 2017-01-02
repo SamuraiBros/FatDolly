@@ -65,6 +65,7 @@ public class Hub extends BaseActivity {
             startRegistration();
         else
             removeRegistration();
+
         Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
         // Update the hub name and controller info
         hubName_TextView = (TextView) findViewById(R.id.textview_hubName);

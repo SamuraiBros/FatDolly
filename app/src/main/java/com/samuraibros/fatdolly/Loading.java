@@ -111,6 +111,8 @@ public class Loading extends BaseActivity {
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is running");
             //updateLoadingMessage(message.next());
 
+            Configurations.resetConfigurations(Loading. this);
+
             try {
                 sleep(3000);
             } catch (InterruptedException e) {

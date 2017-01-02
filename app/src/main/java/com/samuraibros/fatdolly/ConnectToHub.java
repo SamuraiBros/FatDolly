@@ -69,7 +69,7 @@ public class ConnectToHub extends BaseActivity {
         //discoveredDevices.clear();
 
         /*if (Build.VERSION.SDK_INT >= 21) {
-            mLEScanner = HubService.mBluetoothAdapter.getBluetoothLeScanner();
+            mLEScanner = Configurations.mBluetoothAdapter.getBluetoothLeScanner();
             settings = new ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .build();
@@ -264,7 +264,7 @@ public class ConnectToHub extends BaseActivity {
                 String[] tokens = device_name_temp.split("'");
                 final String device_name = tokens[0];
                 final String device_mac = discoveredDevices.get(device_name);
-                Log.d("AudhHub", "ConnectToHub: ClickListener: Device Address: " + device_mac);
+                Log.d("AudhHub", mClass_string + ": ClickListener: Device Address: " + device_mac);
 
                 // Creates a popup dialog to provide further choices for a response
                 final AlertDialog alertDialog = new AlertDialog.Builder(ConnectToHub.this).create(); //Read Update
@@ -278,10 +278,10 @@ public class ConnectToHub extends BaseActivity {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(getResources().getString(R.string.extra_sender_class), ConnectToHub.class.toString());
                         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_share_control_request));
-                        intent.putExtra(getResources().getString(R.string.extra_requester_address), HubService.getHubAddress());
+                        intent.putExtra(getResources().getString(R.string.extra_requester_address), Configurations.getHubAddress());
                         intent.putExtra(getResources().getString(R.string.extra_responder_address), device_mac);
                         intent.putExtra(getResources().getString(R.string.extra_responder_name), device_name);
-                        intent.putExtra(getResources().getString(R.string.extra_requester_name), HubService.getHubName());
+                        intent.putExtra(getResources().getString(R.string.extra_requester_name), Configurations.getHubName());
                         startActivity(intent);
                         finish();
                     }
@@ -297,7 +297,7 @@ public class ConnectToHub extends BaseActivity {
                  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                  intent.putExtra(getResources().getString(R.string.extra_sender_class), ConnectToHub.class.toString());
                  intent.putExtra(getResources().getString(R.string.extra_loading_type), "TakeControlRequest");
-                 intent.putExtra("RequestingAddress", HubService.getHubAddress());
+                 intent.putExtra("RequestingAddress", Configurations.getHubAddress());
                  intent.putExtra(getResources().getString(R.string.extra_device_address), device_mac);
                  startActivity(intent);
                  finish();
@@ -315,7 +315,7 @@ public class ConnectToHub extends BaseActivity {
         refresh(null);
 
         running = true;
-        Log.d(getResources().getString(R.string.app_name), "ConnectToHub: onCreate: ended");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate: ended");
     }
 
     @Override
@@ -328,6 +328,7 @@ public class ConnectToHub extends BaseActivity {
      * Used to detect available peers that are in range
      */
     private void discoverService() {
+        Log.d(getResources().getString(R.string.app_name), "discoverService(): starting...");
         mManager.discoverServices(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -343,61 +344,48 @@ public class ConnectToHub extends BaseActivity {
                 }
             }
         });
+        Log.d(getResources().getString(R.string.app_name), "discoverService(): ended...");
     }
 
     /**
      * Used to connect to peer
      */
     private void connectPeer() {
+        Log.d(getResources().getString(R.string.app_name), "connectPeer(): starting...");
         config.deviceAddress = mDevice.deviceAddress;
+        final String address = mDevice.deviceAddress;
+        final String name = mDevice.deviceName;
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
             @Override
             public void onSuccess() {
                 //success logic
-                Log.d("FatDolly", "Connected to Peer");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + "connectPeer(): Connected to Peer");
+                Configurations.setController(false);
+                Configurations.setControllerAddress(address);
+                Configurations.setControllerName(name);
             }
 
             @Override
             public void onFailure(int reason) {
                 //failure logic
-                Log.d("FatDolly", "Failed to connect to Peer");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + "connectPeer(): Failed to connect to Peer");
             }
         });
+
+        gotoHub_helper();
+        Log.d(getResources().getString(R.string.app_name), "connectPeer(): ended...");
     }
-    /**
-     * Switches to the Connected Users screen when the button is pressed
-     * @param view
-     */
-    public void gotoHub (View view) {
-        // Creates a popup dialog to provide further choices for a response
-        final AlertDialog alertDialog = new AlertDialog.Builder(ConnectToHub.this).create();
 
-        // Sets the title for the popup dialog
-        alertDialog.setTitle("Switch over to your Hub");
-        alertDialog.setMessage("Are you sure?");
-
-        // Switches to hub
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                /*Intent intent = new Intent(ConnectToHub.this, Loading.class);
-                intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
-                intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_connect_to_hub));
-                intent.putExtra(getResources().getString(R.string.extra_loading_class), Hub.class.toString());
-                startActivity(intent);
-                finish();*/
-            }
-        });
-
-        // Stays in current hub
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                alertDialog.cancel();
-            }
-        });
-
-        // Displays the dialogue
-        alertDialog.show();
+    @Override
+    protected void gotoHub_helper() {
+        Intent intent = new Intent(ConnectToHub.this, Loading.class);
+        Configurations.setController(false);
+        intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
+        intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
+        intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
+        startActivity(intent);
+        finish();
     }
 
     /**

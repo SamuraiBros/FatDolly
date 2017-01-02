@@ -46,8 +46,6 @@ public class Home extends BaseActivity {
 
         permissionsGranted = true;
 
-        Configurations.mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-
         checkName();
         updateStatus();
 

@@ -94,6 +94,8 @@
     <string name="value_external">External</string>
     <string name="value_external_device">ExternalDevice</string>
     <string name="value_global">GLOBAL</string>
+    <string name="value_metadata_artist_init">None</string>
+    <string name="value_metadata_title_init">None</string>
     <string name="value_remove_device">RemoveDevice</string>
     <string name="value_requester">Requester</string>
     <string name="value_response">Response</string>

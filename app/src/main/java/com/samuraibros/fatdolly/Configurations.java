@@ -142,7 +142,7 @@ public class Configurations extends Application {
     //Stack to keep track of activities
     private static Stack<String> activitiesStack = new Stack<>();
     //Reference to class string
-    private final String mClass_string = Configurations.class.toString();
+    private static final String mClass_string = Configurations.class.toString();
 
 
     /**
@@ -271,23 +271,91 @@ public class Configurations extends Application {
         }
     }
 
+    public static void resetConfigurations(Context c) {
+        try {
+            //Acquire locks to add the data
+            userDataLock.acquire();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Acquired User lock");
+            deviceDataLock.acquire();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Acquired Device lock");
+            notificationsDataLock.acquire();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Acquired Notifications lock");
+            requestsDataLock.acquire();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Acquired Request lock");
+
+            //Initialize global audio manager
+            mAudioManager = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+
+            //Reset the notifications
+            notificationsVector.clear();
+            newNotification = false;
+
+            //Initialize the metadata
+            song_artist = c.getResources().getString(R.string.value_metadata_artist_init);
+            song_title = c.getResources().getString(R.string.value_metadata_title_init);
+
+            //Initialize Vibrator
+            mVibrator = (Vibrator) c.getSystemService(Context.VIBRATOR_SERVICE);
+
+            // Initialize user permissions list
+            for (String addr : userAddressSet) {
+                setUserPermissions(c, addr, new ArrayList<String>(), "Initialize", false);
+            }
+
+            // Initialize device connection information
+            for (String addr : deviceAddressSet) {
+                deviceAddressConnectedMap.put(addr, false);
+            }
+
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Checking for device preferences");
+            //Get the stored preferences for previously connected devices
+            SharedPreferences mPreferences = c.getSharedPreferences(PREFERENCES_ID, 0);
+            //Get device history
+            Set<String> addressNameConnected = mPreferences.getStringSet("DeviceAddressNameConnected", new HashSet<String>());
+            //Update device data with the history if any
+            for (String addressName : addressNameConnected) {
+                String[] tokens = addressName.split(",");
+                String name = tokens[0];
+                String addr = tokens[1];
+                boolean connected = Boolean.parseBoolean(tokens[2]);
+                deviceNameAddressMap.put(name, addr);
+                deviceAddressNameMap.put(addr, name);
+                deviceAddressConnectedMap.put(addr, connected);
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: loading device preferences: Name " + name + " Address: " + addr + " Connected: " + tokens[2]);
+            }
+            //Release hold of all the data
+            requestsDataLock.release();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Released Request lock");
+            notificationsDataLock.release();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Released Notifications lock");
+            userDataLock.release();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Released User lock");
+            deviceDataLock.release();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": onCreate: Released Device lock");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": resetConfigurations(): Ended");
+
+    }
     // Manage Notifications
     /**
      * Removes a message from the queue
      * @param message
      */
     public static void dequeueNotification(Context c, String message) {
-        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: starting...");
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: starting...");
         //Removes selects message
         if (message != null && !message.equals("")) {
             try {
                 notificationsDataLock.acquire();
-                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Acquired notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Acquired notification lock");
                 newNotification = false;
                 notificationsVector.remove(message);
-                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Removed " + message + " from queue");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Removed " + message + " from queue");
                 notificationsDataLock.release();
-                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Released notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Released notification lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -296,21 +364,21 @@ public class Configurations extends Application {
         else {
             try {
                 notificationsDataLock.acquire();
-                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Acquired notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Acquired notification lock");
                 Vector<String> messages = (Vector<String>) notificationsVector.clone();
                 for (String mess : messages) {
                     if (!mess.contains("is ")) {
-                        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Removed " + mess + " from queue");
+                        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Removed " + mess + " from queue");
                         notificationsVector.remove(mess);
                     }
                 }
                 notificationsDataLock.release();
-                Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: Released notification lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: Released notification lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        Log.d(c.getResources().getString(R.string.app_name), "HubService: dequeueNotification: ended");
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": dequeueNotification: ended");
     }
 
     // Small utilities
@@ -933,8 +1001,7 @@ public class Configurations extends Application {
         String temp = "";
         try {
             userDataLock.acquire();
-            if (controllerSocket != null)
-                temp = controllerSocket.getRemoteDevice().getAddress();
+            temp = controllerAddress;
             userDataLock.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -955,6 +1022,34 @@ public class Configurations extends Application {
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putString(c.getResources().getString(R.string.preference_hub_name), hubName);
             editor.commit();
+            userDataLock.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sets the controller name
+     * @param name
+     */
+    public static void setControllerName(String name) {
+        try {
+            userDataLock.acquire();
+            controllerName = name;
+            userDataLock.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sets the controller address
+     * @param address
+     */
+    public static void setControllerAddress(String address) {
+        try {
+            userDataLock.acquire();
+            controllerAddress = address;
             userDataLock.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -990,10 +1085,10 @@ public class Configurations extends Application {
      * @param internal
      */
     private void setVolumeLevel(int level, boolean internal) {
-        /*Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: starting....");
+        /*Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: starting....");
         try {
             userDataLock.acquire();
-            Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: Acquired user lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: Acquired user lock");
             volume_level = level;
             if (!internal && !hostHub) {
                 Intent i = new Intent("UpdateHubVolume");
@@ -1008,11 +1103,11 @@ public class Configurations extends Application {
             else if (!internal && hostHub){
                 Intent intent = new Intent("UpdateHubVolume");
                 sendBroadcast(intent);
-                Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: Setting Volume level to: " + volume_level);
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: Setting Volume level to: " + volume_level);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume_level, 0);
             }
             else if (internal && hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: Setting Volume level to: " + volume_level);
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: Setting Volume level to: " + volume_level);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume_level, 0);
                 for (String addr : userAddressSet) {
                     if (!addr.equals(mAddress))
@@ -1020,11 +1115,11 @@ public class Configurations extends Application {
                 }
             }
             userDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: Released user lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: Released user lock");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.d(getResources().getString(R.string.app_name), "HubService: setVolumeLevel: Ended");*/
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setVolumeLevel: Ended");*/
     }
 
     /**
@@ -1091,12 +1186,12 @@ public class Configurations extends Application {
      * @param type
      * @param thread_safe
      */
-    private void setUserPermissions(String address, ArrayList<String> permissions, String type, boolean thread_safe) {
-        /*Log.d(getResources().getString(R.string.app_name), "HubService: setUserPermissions: starting...");
+    private static void setUserPermissions(Context c, String address, ArrayList<String> permissions, String type, boolean thread_safe) {
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: starting...");
         if (thread_safe) {
             try {
                 userDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserPermissions: Acquired user lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: Acquired user lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -1106,32 +1201,32 @@ public class Configurations extends Application {
         if (old_permissions == null) {
             old_permissions = new ArrayList<String>();
         }
-        Log.d(getResources().getString(R.string.app_name), "HubService: setUserPermissions: Updating permissions for " + address + " with type " + type + " to " + TextUtils.join(", ", permissions));
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: Updating permissions for " + address + " with type " + type + " to " + TextUtils.join(", ", permissions));
         userAddressPermissionMap.put(address, permissions);
         if (hostHub && type.equals("Update")) {
-            sendUpdatedUserData("GLOBAL", "Update", false);
+            //sendUpdatedUserData("GLOBAL", "Update", false);
         }
         else if (!hostHub && type.equals("Update") && controllerAddress.equals(address)){
             for (String permission : old_permissions) {
                 if (!permissions.contains(permission)) {
-                    queueNotification("You can no longer " + permission.toLowerCase());
+                    //queueNotification("You can no longer " + permission.toLowerCase());
                 }
             }
             for (String permission : permissions) {
                 if (!old_permissions.contains(permission)) {
-                    queueNotification("You can now " + permission.toLowerCase());
+                    //queueNotification("You can now " + permission.toLowerCase());
                 }
             }
-            broadcastNotification(null);
-            Intent i = new Intent("UserPermissionsUpdated");
-            sendBroadcast(i);
+            //broadcastNotification(null);
+            //Intent i = new Intent("UserPermissionsUpdated");
+            //sendBroadcast(i);
         }
         if (thread_safe) {
             userDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserPermissions: Released user lock");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: Released user lock");
         }
 
-        Log.d(getResources().getString(R.string.app_name), "HubService: setUserPermissions: Ended");*/
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: Ended");
     }
 
     /**
@@ -1221,12 +1316,12 @@ public class Configurations extends Application {
      * @return
      */
     private boolean setDeviceInformation(String address, String name, BluetoothDevice device, boolean connect, String type, boolean thread_safe) {
-        Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: starting...");
         boolean new_device = false;
         /*
         if (address == null) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: address is null");
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Ended");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: address is null");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Ended");
             return new_device;
         }
 
@@ -1234,7 +1329,7 @@ public class Configurations extends Application {
         if (thread_safe) {
             try {
                 deviceDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Acquired device lock");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Acquired device lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return new_device;
@@ -1242,24 +1337,24 @@ public class Configurations extends Application {
         }
 
         if (connect && type.contains("Connect")) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 1");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 1");
             for (String addr : deviceAddressSet) {
                 if (!address.equals(addr)) {
-                    Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 1.1");
-                    Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Adding " + addr);
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 1.1");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Adding " + addr);
                     //deviceAddressConnectedMap.put(address, false);
                     deviceAddressConnectedMap.put(addr, false);
                 }
             }
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 1.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 1.2");
                 Thread connectedDevice_thread = new ConnectA2dpThread(device, name, "Connect");
                 connectedDevice_thread.start();
             }
         } else if (type.contains("Connect")) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 2");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 2");
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 2.1");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 2.1");
                 Thread connectedDevice_thread = new ConnectA2dpThread(device, name, "Disconnect");
                 connectedDevice_thread.start();
             }
@@ -1267,8 +1362,8 @@ public class Configurations extends Application {
 
 
         if (!deviceAddressSet.contains(address)) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 3");
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Creating device data for " + address);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 3");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Creating device data for " + address);
             deviceAddressSet.add(address);
             deviceNameAddressMap.put(name, address);
             deviceAddressNameMap.put(address, name);
@@ -1277,13 +1372,13 @@ public class Configurations extends Application {
             new_device = true;
         }
         else {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 4");
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Updating device data for " + address);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 4");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Updating device data for " + address);
             deviceAddressConnectedMap.put(address, connect);
         }
 
         if (hostHub) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Part 5");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Part 5");
             sendUpdatedDeviceData(false);
         }
 
@@ -1293,10 +1388,10 @@ public class Configurations extends Application {
 
         if (thread_safe) {
             deviceDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Released device lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Released device lock");
         }
 
-        Log.d(getResources().getString(R.string.app_name), "HubService: setDeviceInformation: Ended");*/
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setDeviceInformation: Ended");*/
         return new_device;
     }
 
@@ -1312,12 +1407,12 @@ public class Configurations extends Application {
      * @return
      */
     private boolean setUserInformation(String address, String name, BluetoothSocket socket, ArrayList<String> permissions, String type, boolean thread_safe) {
-        Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: starting...");
         boolean new_user = false;
         /*if (thread_safe) {
             try {
                 userDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Acquired user lock");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acquired user lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return new_user;
@@ -1325,21 +1420,21 @@ public class Configurations extends Application {
         }
 
         if (permissions == null) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Permissions are null");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Permissions are null");
             permissions = new ArrayList<String>();
         }
         if (type.equals(getResources().getString(R.string.value_user_to_user))) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 1");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1");
             // Checks to make sure hub is not already connected to user
             if (socket == null) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 1.1");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.1");
                 //Connects to user
                 Thread connection = new ConnectUserToUserThread(mBluetoothAdapter.getRemoteDevice(address), getApplicationContext());
                 connection.start();
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 1.2");
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: UserToUser data Update for: " + address);
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: UserToUser data Update for: " + address);
                 userAddressSet.add(address);
                 userNameAddressMaps.put(name, address);
                 userAddressNameMap.put(address, name);
@@ -1363,25 +1458,25 @@ public class Configurations extends Application {
             }
         }
         else if (type.equals(getResources().getString(R.string.value_acceptor))) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2");
             //Send remote user its user number
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Acceptor Update For: " + address);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acceptor Update For: " + address);
             try {
                 socket.getOutputStream().write(Utilities.stringToByteArray(getResources().getString(R.string.request_volume_change) + "," + Integer.toString(volume_level) + ';'));
                 socket.getOutputStream().write(Utilities.stringToByteArray(getResources().getString(R.string.request_metadata_change) + "," + song_title + "," + song_artist + ";"));
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Sending " + address + " Volume and Metadata infromation");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Sending " + address + " Volume and Metadata infromation");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.1");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.1");
                 userAddressPendingSet.add(address);
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Added: " + address + " to pending user set");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to pending user set");
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.2");
                 userAddressSet.add(address);
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Added: " + address + " to active user set");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to active user set");
             }
 
             userNameAddressMaps.put(name, address);
@@ -1390,11 +1485,11 @@ public class Configurations extends Application {
             userAddressSocketMap.put(address, socket);
             //Start thread to manage user connection
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.3");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.3");
                 userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_controller_from_user)));
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 2.4");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.4");
                 userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_user_from_user)));
                 Intent i = new Intent("UserConfirmation");
                 sendBroadcast(i);
@@ -1403,8 +1498,8 @@ public class Configurations extends Application {
             userAddressThreadMap.get(address).start();
         }
         else  if (type.equals(getResources().getString(R.string.value_requester))) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 3");
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Requestor update for: " + address);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 3");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Requestor update for: " + address);
             //userAddressSet.add(address);
             userAddressPendingSet.add(address);
             userNameAddressMaps.put(name, address);
@@ -1423,8 +1518,8 @@ public class Configurations extends Application {
             sendBroadcast(i);
         }
         else  if (type.equals(getResources().getString(R.string.value_exists))) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Part 4");
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Existing update for: " + address);
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 4");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Existing update for: " + address);
             userNameAddressMaps.put(name, address);
             userAddressNameMap.put(address, name);
             setUserPermissions(address, permissions, getResources().getString(R.string.value_update), false);
@@ -1432,10 +1527,10 @@ public class Configurations extends Application {
 
         if (thread_safe) {
             userDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Released user lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Released user lock");
         }
 
-        Log.d(getResources().getString(R.string.app_name), "HubService: setUserInformation: Ended");*/
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Ended");*/
         return new_user;
     }
 
@@ -1448,11 +1543,11 @@ public class Configurations extends Application {
      * @param thread_safe
      */
     private void clearDeviceInformation(String address, String name, boolean thread_safe) {
-        /*Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: starting...");
+        /*Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: starting...");
         if (thread_safe) {
             try {
                 deviceDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: Acquired device lock");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: Acquired device lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return;
@@ -1460,8 +1555,8 @@ public class Configurations extends Application {
         }
 
         if (address != null && !deviceAddressSet.contains(address)) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: Part 1");
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: Removed " + address + " from device set");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: Part 1");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: Removed " + address + " from device set");
             deviceAddressSet.remove(address);
             //deviceNameAddressMap.remove(name);
             //deviceAddressNameMap.remove(address);
@@ -1473,15 +1568,15 @@ public class Configurations extends Application {
             sendBroadcast(i);
         }
         else {
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: Part 2");
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: cleared all device data");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: Part 2");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: cleared all device data");
             deviceAddressSet.clear();
             deviceNameAddressMap.clear();
             deviceAddressNameMap.clear();
             deviceAddressDeviceMap.clear();
             deviceAddressConnectedMap.clear();
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: Part 2.1");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: Part 2.1");
                 sendUpdatedDeviceData(false);
             }
             // Update the device connection list
@@ -1492,10 +1587,10 @@ public class Configurations extends Application {
 
         if (thread_safe) {
             deviceDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: released device lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: released device lock");
         }
 
-        Log.d(getResources().getString(R.string.app_name), "HubService: clearDeviceInformation: ended");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearDeviceInformation: ended");
         */
     }
 
@@ -1507,11 +1602,11 @@ public class Configurations extends Application {
      * @param thread_safe
      */
     private void clearUserInformation(String address, String name, boolean thread_safe) {
-        Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: starting");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: starting");
         /*if (thread_safe) {
             try {
                 userDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Acquired user lock");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Acquired user lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return;
@@ -1519,8 +1614,8 @@ public class Configurations extends Application {
         }
 
         if (address != null && userAddressSet.contains(address) && !mAddress.equals(address)) {
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 1");
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Removed " + address + "from user set");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 1");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Removed " + address + "from user set");
             userAddressSet.remove(address);
             //userAddressPendingSet.add(addr);
             userNameAddressMaps.remove(name);
@@ -1528,10 +1623,10 @@ public class Configurations extends Application {
 
             // Close the socket
             if (userAddressSocketMap.get(address) != null) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 1.1");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 1.1");
                 try {
                     userAddressSocketMap.get(address).close();
-                    Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Closed socket to " + address);
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Closed socket to " + address);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -1540,7 +1635,7 @@ public class Configurations extends Application {
 
             userAddressPermissionMap.remove(address);
             if (userAddressThreadMap.get(address) != null) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 1.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 1.2");
                 userAddressThreadMap.get(address).interrupt();
             }
             userAddressThreadMap.remove(address);
@@ -1550,14 +1645,14 @@ public class Configurations extends Application {
             sendBroadcast(i);
         }
         else {
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 2");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 2");
             // Close the sockets
             for (String addr : userAddressSet) {
                 if (userAddressSocketMap.get(addr) != null){
-                    Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 2.1");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 2.1");
                     try {
                         userAddressSocketMap.get(addr).close();
-                        Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Closed socket to " + addr);
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Closed socket to " + addr);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -1566,28 +1661,28 @@ public class Configurations extends Application {
 
             for (String addr : userAddressSet) {
                 if (userAddressThreadMap.get(addr) != null){
-                    Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 2.1");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 2.1");
                     userAddressThreadMap.get(addr).interrupt();
                 }
             }
 
             if (controllerSocket != null) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 2.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 2.2");
                 try {
                     controllerSocket.close();
-                    Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Closed socket to controller");
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Closed socket to controller");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
             if (controllerThread != null) {
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Part 2.2");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Part 2.2");
                 controllerThread.interrupt();
-                Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Closed socket to controller");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Closed socket to controller");
             }
 
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: Cleared all user data");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: Cleared all user data");
             controllerThread = null;
             controllerSocket = null;
             controllerAddress = null;
@@ -1609,10 +1704,10 @@ public class Configurations extends Application {
 
         if (thread_safe) {
             userDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: released user lock");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: released user lock");
         }*/
 
-        Log.d(getResources().getString(R.string.app_name), "HubService: clearUserInformation: ended");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": clearUserInformation: ended");
     }
 }
 

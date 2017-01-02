@@ -18,6 +18,9 @@ public class HubNotificationListenerService extends NotificationListenerService 
     private RemoteController mRemoteController;
     //Binder given to bound activities
     private final IBinder mBinder = new LocalBinder();
+    //Reference to class string
+    private static final String mClass_string = HubNotificationListenerService.class.toString();
+
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -70,7 +73,7 @@ public class HubNotificationListenerService extends NotificationListenerService 
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(getResources().getString(R.string.app_name), "HubService: onBind: new binding wtih " + intent.getAction());
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onBind: new binding wtih " + intent.getAction());
         return mBinder;
     }
 

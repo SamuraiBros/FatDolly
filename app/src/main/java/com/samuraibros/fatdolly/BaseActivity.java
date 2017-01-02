@@ -53,11 +53,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
             0.5f);
 
-    /*HubService mService;
+    /*Configurations mService;
     boolean mBound = false;
 
     //Service connections
-    private ServiceConnection MyHubService_Conn  = new ServiceConnection() {
+    private ServiceConnection MyConfigurations_Conn  = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
@@ -125,7 +125,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         //Service bindning to ensure that service does not continue in background after closing
         /*Intent i = new Intent(this, Configurations.class);
-        bindService(i, MyHubService_Conn, Context.BIND_AUTO_CREATE);*/
+        bindService(i, MyConfigurations_Conn, Context.BIND_AUTO_CREATE);*/
     }
 
     /* register the broadcast receiver with the intent values to be matched */
@@ -279,7 +279,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param context of the bound activity
      */
     public void playBackRequest(final Context context) {
-        Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": playBackRequest: starting...");
         ArrayList<String> permissions = new ArrayList<>();
         //Get the permissions
         if (!Configurations.isController()) {
@@ -373,7 +373,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             // Displays the dialogue
             dialog.show();
         }
-        Log.d(getResources().getString(R.string.app_name), "HubService: playBackRequest: ended...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": playBackRequest: ended...");
     }
 
     /**
