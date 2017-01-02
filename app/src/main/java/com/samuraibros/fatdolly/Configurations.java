@@ -1400,19 +1400,18 @@ public class Configurations extends Application {
      * Sets the user infromation
      * @param address
      * @param name
-     * @param socket
      * @param permissions
      * @param type
      * @param thread_safe
      * @return
      */
-    private boolean setUserInformation(String address, String name, BluetoothSocket socket, ArrayList<String> permissions, String type, boolean thread_safe) {
-        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: starting...");
+    public static boolean setUserInformation(Context c, String address, String name, ArrayList<String> permissions, String type, boolean thread_safe) {
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: starting...");
         boolean new_user = false;
-        /*if (thread_safe) {
+        if (thread_safe) {
             try {
                 userDataLock.acquire();
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acquired user lock");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acquired user lock");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return new_user;
@@ -1420,117 +1419,118 @@ public class Configurations extends Application {
         }
 
         if (permissions == null) {
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Permissions are null");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Permissions are null");
             permissions = new ArrayList<String>();
         }
-        if (type.equals(getResources().getString(R.string.value_user_to_user))) {
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1");
+        if (type.equals(c.getResources().getString(R.string.value_user_to_user))) {
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1");
             // Checks to make sure hub is not already connected to user
-            if (socket == null) {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.1");
+            //if (socket == null) {
+            if (false) {
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.1");
                 //Connects to user
-                Thread connection = new ConnectUserToUserThread(mBluetoothAdapter.getRemoteDevice(address), getApplicationContext());
-                connection.start();
+                //Thread connection = new ConnectUserToUserThread(mBluetoothAdapter.getRemoteDevice(address), getApplicationContext());
+                //connection.start();
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.2");
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: UserToUser data Update for: " + address);
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 1.2");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: UserToUser data Update for: " + address);
                 userAddressSet.add(address);
                 userNameAddressMaps.put(name, address);
                 userAddressNameMap.put(address, name);
-                userAddressSocketMap.put(address, socket);
-                setUserPermissions(address, permissions, getResources().getString(R.string.value_connection), false);
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_user_from_user)));
-                userAddressThreadMap.get(address).start();
+                //userAddressSocketMap.put(address, socket);
+                setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_connection), false);
+                //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_user_from_user)));
+                //userAddressThreadMap.get(address).start();
 
                 Intent i;
 
 
                 //Send user confirmation
-                Intent intent = new Intent(getResources().getString(R.string.intent_send_remote_message));
-                intent.putExtra(getResources().getString(R.string.extra_device_address), address);
-                intent.putExtra(getResources().getString(R.string.extra_message), getResources().getString(R.string.value_user_confirmation) + "," + mAddress + "," + getResources().getString(R.string.value_querry) + ";");
-                sendBroadcast(intent);
+                Intent intent = new Intent(c.getResources().getString(R.string.intent_send_remote_message));
+                intent.putExtra(c.getResources().getString(R.string.extra_device_address), address);
+                intent.putExtra(c.getResources().getString(R.string.extra_message), c.getResources().getString(R.string.value_user_confirmation) + "," + mAddress + "," + c.getResources().getString(R.string.value_querry) + ";");
+                c.sendBroadcast(intent);
 
                 //Update user connection list
-                i = new Intent(getResources().getString(R.string.intent_refresh_connected_users));
-                sendBroadcast(i);
+                i = new Intent(c.getResources().getString(R.string.intent_refresh_connected_users));
+                c.sendBroadcast(i);
             }
         }
-        else if (type.equals(getResources().getString(R.string.value_acceptor))) {
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2");
+        else if (type.equals(c.getResources().getString(R.string.value_acceptor))) {
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2");
             //Send remote user its user number
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acceptor Update For: " + address);
-            try {
-                socket.getOutputStream().write(Utilities.stringToByteArray(getResources().getString(R.string.request_volume_change) + "," + Integer.toString(volume_level) + ';'));
-                socket.getOutputStream().write(Utilities.stringToByteArray(getResources().getString(R.string.request_metadata_change) + "," + song_title + "," + song_artist + ";"));
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Sending " + address + " Volume and Metadata infromation");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acceptor Update For: " + address);
+            /*try {
+                socket.getOutputStream().write(Utilities.stringToByteArray(c.getResources().getString(R.string.request_volume_change) + "," + Integer.toString(volume_level) + ';'));
+                socket.getOutputStream().write(Utilities.stringToByteArray(c.getResources().getString(R.string.request_metadata_change) + "," + song_title + "," + song_artist + ";"));
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Sending " + address + " Volume and Metadata infromation");
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.1");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.1");
                 userAddressPendingSet.add(address);
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to pending user set");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to pending user set");
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.2");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.2");
                 userAddressSet.add(address);
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to active user set");
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to active user set");
             }
 
             userNameAddressMaps.put(name, address);
             userAddressNameMap.put(address, name);
-            setUserPermissions(address, permissions, getResources().getString(R.string.value_connection), false);
-            userAddressSocketMap.put(address, socket);
+            setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_connection), false);
+            //userAddressSocketMap.put(address, socket);
             //Start thread to manage user connection
             if (hostHub) {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.3");
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_controller_from_user)));
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.3");
+                //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_controller_from_user)));
             }
             else {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.4");
-                userAddressThreadMap.put(address, new ConnectionListenerThread(socket, getResources().getString(R.string.value_as_user_from_user)));
-                Intent i = new Intent("UserConfirmation");
-                sendBroadcast(i);
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.4");
+                //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_user_from_user)));
+                //Intent i = new Intent("UserConfirmation");
+                //sendBroadcast(i);
             }
 
-            userAddressThreadMap.get(address).start();
+            //userAddressThreadMap.get(address).start();
         }
-        else  if (type.equals(getResources().getString(R.string.value_requester))) {
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 3");
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Requestor update for: " + address);
+        else  if (type.equals(c.getResources().getString(R.string.value_requester))) {
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 3");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Requestor update for: " + address);
             //userAddressSet.add(address);
             userAddressPendingSet.add(address);
             userNameAddressMaps.put(name, address);
             userAddressNameMap.put(address, name);
-            setUserPermissions(address, permissions, getResources().getString(R.string.value_connection), false);
-            userAddressThreadMap.put(address, new ConnectionListenerThread(controllerSocket, getResources().getString(R.string.value_as_user_from_controller)));
+            setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_connection), false);
+           /* userAddressThreadMap.put(address, new ConnectionListenerThread(controllerSocket, c.getResources().getString(R.string.value_as_user_from_controller)));
             userAddressThreadMap.get(address).start();
             userAddressSocketMap.put(address, controllerSocket);
-            controllerThread = userAddressThreadMap.get(address);
+            controllerThread = userAddressThreadMap.get(address);*/
             controllerAddress = address;
 
             //Update user connection list
             Intent i;
 
-            i = new Intent(getResources().getString(R.string.intent_initial_user_information_set));
-            sendBroadcast(i);
+            //i = new Intent(c.getResources().getString(R.string.intent_initial_user_information_set));
+            //sendBroadcast(i);
         }
-        else  if (type.equals(getResources().getString(R.string.value_exists))) {
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 4");
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Existing update for: " + address);
+        else  if (type.equals(c.getResources().getString(R.string.value_exists))) {
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 4");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Existing update for: " + address);
             userNameAddressMaps.put(name, address);
             userAddressNameMap.put(address, name);
-            setUserPermissions(address, permissions, getResources().getString(R.string.value_update), false);
+            setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_update), false);
         }
 
         if (thread_safe) {
             userDataLock.release();
-            Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Released user lock");
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Released user lock");
         }
 
-        Log.d(getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Ended");*/
+        Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Ended");
         return new_user;
     }
 

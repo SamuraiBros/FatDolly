@@ -61,10 +61,7 @@ public class Hub extends BaseActivity {
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = Hub.class.toString();
 
-        if (Configurations.isController())
-            startRegistration();
-        else
-            removeRegistration();
+        discoverService();
 
         Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
         // Update the hub name and controller info

@@ -19,6 +19,7 @@
     <string name="extra_loading_class">LoadingClass</string>
     <string name="extra_loading_type">LoadingType</string>
     <string name="extra_message">Message</string>
+    <string name="extra_peer_list">PeerList</string>
     <string name="extra_permissions">Permissions</string>
     <string name="extra_permissions_bundle">PermissionsBundle</string>
     <string name="extra_received_control">ReceivedControl</string>
@@ -49,6 +50,7 @@
     <string name="intent_initial_user_information_set">InitialUserInformationSet</string>
     <string name="intent_internal_closure">InternalClosure</string>
     <string name="intent_new_notification">NewNotification</string>
+    <string name="intent_on_peers_available">New Peer List</string>
     <string name="intent_refresh_connected_users">RefreshConnectedUsers</string>
     <string name="intent_refresh_playback_requests">RefreshPlaybackRequests</string>
     <string name="intent_send_remote_message">SendRemoteMessage</string>
@@ -96,6 +98,8 @@
     <string name="value_global">GLOBAL</string>
     <string name="value_metadata_artist_init">None</string>
     <string name="value_metadata_title_init">None</string>
+    <string name="value_registration_succeeded">Registration Succeeded</string>
+    <string name="value_registration_failed">Registration Failed</string>
     <string name="value_remove_device">RemoveDevice</string>
     <string name="value_requester">Requester</string>
     <string name="value_response">Response</string>
@@ -108,6 +112,8 @@
     <string name="value_user_confirmation">UserConfirmation</string>
     <string name="value_update">Update</string>
     <string name="value_update_user_permissions">UpdateUserPermissions</string>
+    <string name="value_unregistration_succeeded">Unregistration Succeeded</string>
+    <string name="value_unregistration_failed">Unregistration Failed</string>
     <string name="value_user">User</string>
     <string name="value_user_addresses">UserAddresses</string>
     <string name="value_user_set_update">UserSetUpdate</string>
@@ -125,6 +131,7 @@
     </string-array>
     <string-array name="loading_hub_message">
         <item>Configuring Changes...</item>
+        <item>Configuring service registration...</item>
         <item>Starting Hub...</item>
     </string-array>
     <string-array name="theme_array">

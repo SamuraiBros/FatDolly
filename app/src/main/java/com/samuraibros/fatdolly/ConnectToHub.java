@@ -1,6 +1,7 @@
 package com.samuraibros.fatdolly;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,13 +46,16 @@ public class ConnectToHub extends BaseActivity {
     private ListView peerDevices_listView;
     private Map<String, String> peerNametoAddress_map = new HashMap<>();
     private Map<String, WifiP2pDevice> peerAddresstoDevice_map = new HashMap<>();
-    private final HashMap<String, String> peerHubs = new HashMap<String, String>();
-    private WifiP2pManager.DnsSdTxtRecordListener txtListener;
-    private WifiP2pManager.DnsSdServiceResponseListener servListener;
 
     @Override
     protected void onReceive_helper(Context context, Intent intent) {
+        String action = intent.getAction();
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onReceive_helper() " + action);
 
+        if (action.equals(getResources().getString(R.string.intent_on_peers_available))) {
+            ArrayList<WifiP2pDevice> peer_list = intent.getParcelableArrayListExtra(getResources().getString(R.string.extra_peer_list));
+            updatedPeerList(peer_list);
+        }
     }
 
     @Override
@@ -58,8 +63,11 @@ public class ConnectToHub extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_hub);
 
-        registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = ConnectToHub.class.toString();
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate() starting...");
+
+        mServerIntentFilter.addAction(getResources().getString(R.string.intent_on_peers_available));
+        registerReceiver(mServerReceiver, mServerIntentFilter);
 
         running = true;
 
@@ -102,6 +110,9 @@ public class ConnectToHub extends BaseActivity {
             }
         });
 
+
+
+
         rotate_animation.setDuration(2000);
         rotate_animation.setRepeatCount(5);
         refresh_button.setOnClickListener(new View.OnClickListener() {
@@ -113,97 +124,7 @@ public class ConnectToHub extends BaseActivity {
             }
         });
 
-        mPeerListListener  = new WifiP2pManager.PeerListListener() {
-            @Override
-            public void onPeersAvailable(WifiP2pDeviceList peers) {
-                //Clear the map list and add the new list of name and address pairings
-                boolean new_peer = false;
-                for (WifiP2pDevice dev : peers.getDeviceList()) {
-                    //if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress)) {
-                    if (!peerNametoAddress_map.containsKey(dev.deviceName)) {
-                        //Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: New peer available -" + peerHubs.get(dev.deviceAddress));
-                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: New peer available -" + dev.deviceName);
-                        //peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
-                        peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
-                        peerAddresstoDevice_map.put(dev.deviceAddress, dev);
-                        new_peer = true;
-                    }
-                    else {
-                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer:onPeersAvailable: Old Peer or other device -" + dev.deviceName);
-                    }
-                }
 
-                if (new_peer) {
-                    peerDevices_arrayAdapter.clear();
-                    peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
-                }
-
-                /*if (peerNametoAddress_map.isEmpty()) {
-                    refreshPeers(null);
-                }*/
-            }
-        };
-
-        txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
-            @Override
-        /* Callback includes:
-         * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
-         * record: TXT record dta as a map of key/value pairs.
-         * device: The device running the advertised service.
-         */
-
-            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
-                Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: DnsSdTxtRecord available -" + record.toString());
-                if (!peerHubs.keySet().contains(device.deviceAddress)) {
-                    Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: NEW DnsSdTxtRecord available -" + record.toString());
-                    peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hub_name)));
-                    discoverService();
-                }
-            }
-        };
-
-        servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-            @Override
-            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
-                                                WifiP2pDevice resourceType) {
-
-                // Update the device name with the human-friendly version from
-                // the DnsTxtRecord, assuming one arrived.
-                resourceType.deviceName = peerHubs
-                        .containsKey(resourceType.deviceAddress) ? peerHubs
-                        .get(resourceType.deviceAddress) : resourceType.deviceName;
-
-                // Add to the custom adapter defined specifically for showing
-                // wifi devices.
-                /*WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
-                        .findFragmentById(R.id.frag_peerlist);
-                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-                        .getListAdapter());
-
-                adapter.add(resourceType);
-                adapter.notifyDataSetChanged();*/
-                Log.d(getResources().getString(R.string.app_name), "onBonjourServiceAvailable " + instanceName);
-            }
-        };
-
-        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
-
-        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
-        mManager.addServiceRequest(mChannel,
-                serviceRequest,
-                new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        // Success!
-                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: AddingServiceRequest Success");
-                    }
-
-                    @Override
-                    public void onFailure(int code) {
-                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-                        Log.d(getResources().getString(R.string.app_name), "ConnectToPeer: AddingServiceRequest Failed");
-                    }
-                });
 
         peerDevices_listView = (ListView) findViewById(R.id.listview_connectToHub);
 
@@ -242,8 +163,6 @@ public class ConnectToHub extends BaseActivity {
                 alertDialog.show();
             }
         });
-
-        refresh(null);
 
         /*// Initializes the adapter
         search_arrayAdapter =
@@ -315,7 +234,52 @@ public class ConnectToHub extends BaseActivity {
         refresh(null);
 
         running = true;
-        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate: ended");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate: ending...");
+    }
+
+    /* register the broadcast receiver with the intent values to be matched */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mReceiver, mIntentFilter);
+    }
+    /* unregister the broadcast receiver */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mReceiver);
+    }
+
+    private void updatedPeerList(ArrayList<WifiP2pDevice> devices) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": updatedPeerList: starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": updatedPeerList: Number of devices: " + Integer.toString(devices.size()));
+        //Clear the map list and add the new list of name and address pairings
+        boolean new_peer = false;
+        for (WifiP2pDevice dev : devices) {
+            //if (!peerNametoAddress_map.containsKey(dev.deviceName) && peerHubs.containsKey(dev.deviceAddress)) {
+            if (!peerNametoAddress_map.containsKey(dev.deviceName)) {
+                //Log.d(getResources().getString(R.string.app_name), mClass_string + ": onPeersAvailable: New peer available -" + peerHubs.get(dev.deviceAddress));
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": updatedPeerList: New peer available -" + dev.deviceName);
+                //peerNametoAddress_map.put(peerHubs.get(dev.deviceAddress), dev.deviceAddress);
+                peerNametoAddress_map.put(dev.deviceName, dev.deviceAddress);
+                peerAddresstoDevice_map.put(dev.deviceAddress, dev);
+                new_peer = true;
+            }
+            else {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": updatedPeerList: Old Peer or other device -" + dev.deviceName);
+            }
+        }
+
+        if (new_peer) {
+            peerDevices_arrayAdapter.clear();
+            peerDevices_arrayAdapter.addAll(peerNametoAddress_map.keySet());
+        }
+
+                /*if (peerNametoAddress_map.isEmpty()) {
+                    refreshPeers(null);
+                }*/
+
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": updatedPeerList: ending...");
     }
 
     @Override
@@ -325,33 +289,10 @@ public class ConnectToHub extends BaseActivity {
     }
 
     /**
-     * Used to detect available peers that are in range
-     */
-    private void discoverService() {
-        Log.d(getResources().getString(R.string.app_name), "discoverService(): starting...");
-        mManager.discoverServices(mChannel, new WifiP2pManager.ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                // Success!
-            }
-
-            @Override
-            public void onFailure(int code) {
-                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-                if (code == WifiP2pManager.P2P_UNSUPPORTED) {
-                    Log.d(getResources().getString(R.string.app_name), "P2P isn't supported on this device.");
-                }
-            }
-        });
-        Log.d(getResources().getString(R.string.app_name), "discoverService(): ended...");
-    }
-
-    /**
      * Used to connect to peer
      */
     private void connectPeer() {
-        Log.d(getResources().getString(R.string.app_name), "connectPeer(): starting...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": connectPeer(): starting...");
         config.deviceAddress = mDevice.deviceAddress;
         final String address = mDevice.deviceAddress;
         final String name = mDevice.deviceName;
@@ -364,6 +305,7 @@ public class ConnectToHub extends BaseActivity {
                 Configurations.setController(false);
                 Configurations.setControllerAddress(address);
                 Configurations.setControllerName(name);
+                Configurations.setUserInformation(ConnectToHub.this, address, name, new ArrayList<String>(), getResources().getString(R.string.value_acceptor), true);
             }
 
             @Override
@@ -374,13 +316,12 @@ public class ConnectToHub extends BaseActivity {
         });
 
         gotoHub_helper();
-        Log.d(getResources().getString(R.string.app_name), "connectPeer(): ended...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": connectPeer(): ended...");
     }
 
     @Override
     protected void gotoHub_helper() {
         Intent intent = new Intent(ConnectToHub.this, Loading.class);
-        Configurations.setController(false);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
