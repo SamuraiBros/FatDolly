@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -107,6 +108,8 @@ public class Configurations extends Application {
     private static String mAddress = "00:15:83:CA:A1:E2";
     //Reference to device mac address
     private static String controllerAddress = null;
+    //Reference to device mac address
+    private static InetAddress controllerIP = null;
     //List of notifications
     private static Vector<String> notificationsVector = new Vector<>();
     //Determines whether there are unseen notifications
@@ -994,6 +997,22 @@ public class Configurations extends Application {
     }
 
     /**
+     * Returns the name of the controller
+     * @return
+     */
+    public static InetAddress getControllerIP() {
+        InetAddress temp = null;
+        try {
+            userDataLock.acquire();
+            temp = controllerIP;
+            userDataLock.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return temp;
+    }
+
+    /**
      * Returns the address the controller hub
      * @return
      */
@@ -1036,6 +1055,20 @@ public class Configurations extends Application {
         try {
             userDataLock.acquire();
             controllerName = name;
+            userDataLock.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sets the controller name
+     * @param ip
+     */
+    public static void setControllerIP(InetAddress ip) {
+        try {
+            userDataLock.acquire();
+            controllerIP = ip;
             userDataLock.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
