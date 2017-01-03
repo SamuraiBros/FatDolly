@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,6 +56,8 @@ public class Hub extends BaseActivity {
     //Determines if Hub has been previously started
     public static boolean started = false;
 
+    FileServerAsyncTask Server;
+
     @Override
     protected void onReceive_helper(Context context, Intent intent) {
 
@@ -64,6 +67,9 @@ public class Hub extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hub);
+
+        Server = new FileServerAsyncTask(this);
+        Server.execute();
 
         //Get the needed configurations items
         registerReceiver(mServerReceiver, mServerIntentFilter);
@@ -172,7 +178,7 @@ public class Hub extends BaseActivity {
             @Override
             public void onClick(View v) {
                 ArrayList<String> permissions = new ArrayList<>();
-                if (!Configurations.isController()) {
+                /*if (!Configurations.isController()) {
                     String controllerAddress = Configurations.getControllerAddress();
                     permissions = Configurations.userAddressToPermissions(controllerAddress);
                 }
@@ -182,7 +188,8 @@ public class Hub extends BaseActivity {
                 }
                 else {
                     playBackRequest(Hub.this);
-                }
+                }*/
+                nextSong(null);
             }
         });
 
@@ -334,5 +341,14 @@ public class Hub extends BaseActivity {
             volume_ImageView.setAlpha(1f);
         }
 
+    }
+
+    @Override
+    public void nextSong(View view){
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Next Song... ");
+        String next = "Next Song";
+        Client myClient = new Client(Configurations.getControllerIP().getHostAddress(), 8888,next);
+        myClient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Done Next Song... ");
     }
 }

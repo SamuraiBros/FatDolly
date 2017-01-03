@@ -298,6 +298,7 @@ public class ConnectToHub extends BaseActivity {
     private void connectPeer() {
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": connectPeer(): starting...");
         config.deviceAddress = mDevice.deviceAddress;
+        config.groupOwnerIntent = 0;
         final String address = mDevice.deviceAddress;
         final String name = mDevice.deviceName;
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {

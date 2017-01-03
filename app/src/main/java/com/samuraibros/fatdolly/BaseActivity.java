@@ -618,8 +618,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void nextSong(View view){
-        String next = "Next Song";
-        sendMessage(next);
+
         /*
         Intent i = new Intent("ChangePlayback");
         i.putExtra("Change", "Next");
@@ -737,14 +736,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
+/*
     private void connectWithServer() {
-        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Connection... ");
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Connection... " + Configurations.getControllerIP().getHostAddress());
         try {
             if (clientSocket == null) {
-                clientSocket = new Socket();
-                clientSocket.bind(null);
-                clientSocket.connect((new InetSocketAddress(host, port)), 500);
+                clientSocket = new Socket(Configurations.getControllerIP().getHostAddress(), 8888);
                 if (clientSocket == null)
                 {
                     Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Client Socket is NULL ");
@@ -792,4 +789,5 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         Log.d(getResources().getString(R.string.app_name), "Hub:Send a Message: Done Sending...");
     }
+    */
 }

@@ -185,19 +185,22 @@ public class Loading extends BaseActivity {
 
                 Configurations.setControllerIP(null);
 
-                BaseActivity.mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
-                    @Override
-                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                        InetAddress temp = info.groupOwnerAddress;
-                        Configurations.setControllerIP(temp);
-                    }
-                });
+                if (loading_type.equals(getResources().getString(R.string.loading_hub))) {
 
-                while (Configurations.getControllerIP() == null) {
-                    try {
-                        sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    while (Configurations.getControllerIP() == null) {
+                        try {
+                            sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        BaseActivity.mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                            @Override
+                            public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                                InetAddress temp = info.groupOwnerAddress;
+                                Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread ");
+                                Configurations.setControllerIP(temp);
+                            }
+                        });
                     }
                 }
             }
