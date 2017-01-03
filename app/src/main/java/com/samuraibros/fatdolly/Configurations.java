@@ -1235,6 +1235,7 @@ public class Configurations extends Application {
             old_permissions = new ArrayList<String>();
         }
         Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserPermissions: Updating permissions for " + address + " with type " + type + " to " + TextUtils.join(", ", permissions));
+        permissions = new ArrayList<>(Arrays.asList(USER_PERMISSIONS));
         userAddressPermissionMap.put(address, permissions);
         if (hostHub && type.equals("Update")) {
             //sendUpdatedUserData("GLOBAL", "Update", false);
