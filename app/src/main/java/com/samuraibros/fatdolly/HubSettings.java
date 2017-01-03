@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -16,6 +17,7 @@ import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 public class HubSettings extends BaseActivity {
 
@@ -28,9 +30,25 @@ public class HubSettings extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_hub_settings);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_hubSettings);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hub_settings);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = HubSettings.class.toString();
@@ -139,6 +157,7 @@ public class HubSettings extends BaseActivity {
         });
 
         running = true;
+        initializeLoading();
     }
 
     @Override

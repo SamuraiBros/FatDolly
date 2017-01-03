@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,17 +62,22 @@ public class Hub extends BaseActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hub);
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_hub);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_hub);
+        }
 
-        //Get the needed configurations items
-        registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass_string = Hub.class.toString();
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
 
-        discoverService();
+    @Override
+    protected void initializeActivity_helper() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity starting...");
 
-        Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
         // Update the hub name and controller info
         hubName_TextView = (TextView) findViewById(R.id.textview_hubName);
 
@@ -172,10 +178,10 @@ public class Hub extends BaseActivity {
             @Override
             public void onClick(View v) {
                 ArrayList<String> permissions = new ArrayList<>();
-                if (!Configurations.isController()) {
+                /*if (!Configurations.isController()) {
                     String controllerAddress = Configurations.getControllerAddress();
                     permissions = Configurations.userAddressToPermissions(controllerAddress);
-                }
+                }*/
                 boolean playBackControl = permissions.contains(getResources().getString(R.string.permission_control_playback));
                 if (Configurations.isController() || playBackControl) {
                     nextSong(null);
@@ -197,7 +203,7 @@ public class Hub extends BaseActivity {
                 }
                 boolean discoverabilityControl = permissions.contains(getResources().getString(R.string.permission_control_discoverability));
                 if (Configurations.isController() || discoverabilityControl) {
-                   //makeDiscoverable(null);
+                    //makeDiscoverable(null);
                 }
                 else {
                     discoverableRequest();
@@ -265,8 +271,21 @@ public class Hub extends BaseActivity {
             }
         }*/
 
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity ending...");
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //Get the needed configurations items
+        registerReceiver(mServerReceiver, mServerIntentFilter);
+        mClass_string = Hub.class.toString();
+
+
         running = true;
-        Log.d(getResources().getString(R.string.app_name), "Hub:Started...");
+        initializeLoading();
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate...");
     }
 
     @Override

@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +28,26 @@ public class ConnectToDevice extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_connect_to_device);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_connectToDevice);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect_to_device);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
 
@@ -37,6 +56,8 @@ public class ConnectToDevice extends BaseActivity {
         running = true;
 
         refresh(null);
+
+        initializeLoading();
     }
 
     @Override

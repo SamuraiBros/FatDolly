@@ -11,6 +11,16 @@
     tools:context="com.samuraibros.fatdolly.HubSettings">
 
 
+    <ViewFlipper
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewFlipper_hubSettings">
+
+        <include layout="@layout/loading_overlay"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
     <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -150,6 +160,8 @@
 
     </RelativeLayout>
 
+            </RelativeLayout>
+    </ViewFlipper>
 
 
 </RelativeLayout>

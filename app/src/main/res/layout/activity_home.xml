@@ -12,6 +12,16 @@
     tools:context="com.samuraibros.fatdolly.Home"
     android:background="@android:color/black">
 
+    <ViewFlipper
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewFlipper_home">
+
+    <include layout="@layout/loading_overlay"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <Button
         android:layout_width="30dp"
         android:layout_height="30dp"
@@ -106,5 +116,6 @@
 
 
     </RelativeLayout>
-
+    </RelativeLayout>
+    </ViewFlipper>
 </RelativeLayout>

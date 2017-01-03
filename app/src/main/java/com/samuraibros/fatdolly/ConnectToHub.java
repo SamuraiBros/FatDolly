@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,17 +64,35 @@ public class ConnectToHub extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_connect_to_hub);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_connectToHub);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity starting...");
+
+
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity ending...");
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect_to_hub);
 
         mClass_string = ConnectToHub.class.toString();
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate() starting...");
 
         mServerIntentFilter.addAction(getResources().getString(R.string.intent_on_peers_available));
         registerReceiver(mServerReceiver, mServerIntentFilter);
-
-        running = true;
 
         Intent i;
 
@@ -238,6 +257,9 @@ public class ConnectToHub extends BaseActivity {
         refresh(null);
 
         running = true;
+
+        initializeLoading();
+
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate: ending...");
     }
 
@@ -245,13 +267,11 @@ public class ConnectToHub extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mReceiver, mIntentFilter);
     }
     /* unregister the broadcast receiver */
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
     }
 
     private void updatedPeerList(ArrayList<WifiP2pDevice> devices) {
@@ -302,6 +322,7 @@ public class ConnectToHub extends BaseActivity {
         final String name = mDevice.deviceName;
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
+
             @Override
             public void onSuccess() {
                 //success logic
@@ -325,7 +346,7 @@ public class ConnectToHub extends BaseActivity {
 
     @Override
     protected void gotoHub_helper() {
-        Intent intent = new Intent(ConnectToHub.this, Loading.class);
+        Intent intent = new Intent(ConnectToHub.this, Hub.class);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
@@ -360,7 +381,5 @@ public class ConnectToHub extends BaseActivity {
 
         // Connects the list view to the adapter
         peerDevices_listView.setAdapter(peerDevices_arrayAdapter);
-
-        discoverService();
     }
 }
