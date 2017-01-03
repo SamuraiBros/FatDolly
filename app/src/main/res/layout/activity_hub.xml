@@ -12,212 +12,224 @@
     tools:context="com.samuraibros.fatdolly.Hub">
 
 
-    <RelativeLayout
-        android:orientation="horizontal"
+    <ViewFlipper
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:id="@+id/linearlayout_top">
+        android:layout_height="match_parent"
+        android:id="@+id/viewFlipper_hub">
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@mipmap/ic_otherhub"
-            android:id="@+id/button_topRight"
-            android:layout_gravity="start"
-            android:onClick="gotoConnHub" />
+        <include layout="@layout/loading_overlay"/>
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:id="@+id/linearlayout_hubName">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Hub"
-                android:id="@+id/textview_hubName"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="0dp"
-                android:gravity="center_horizontal"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="caption"
-                android:id="@+id/textview_caption"
-                android:textColor="@android:color/white"
-                android:gravity="center_horizontal"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Connected as:"
-                android:textSize="10dp"
-                android:textColor="@android:color/white"
-                android:id="@+id/textview_connectionType"
-                android:layout_gravity="center_horizontal"/>
-        </LinearLayout>
-        <Button
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentRight="true"
-            android:id="@+id/button_notifications"
-            android:layout_gravity="end"
-            android:background="@mipmap/ic_notifications"
-            android:onClick="gotoNotifications" />
-    </RelativeLayout>
-
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/linearlayout_playback">
-
-        <LinearLayout
-            android:orientation="vertical"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:gravity="center_horizontal">
-
-            <LinearLayout
+            android:layout_height="match_parent">
+            <RelativeLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal">
-                <ImageView
+                android:layout_alignParentTop="true"
+                android:id="@+id/linearlayout_top">
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@mipmap/ic_otherhub"
+                    android:id="@+id/button_topRight"
+                    android:layout_gravity="start"
+                    android:onClick="gotoConnHub" />
+
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/imageview_volume"
-                    android:background="@mipmap/ic_volume"
-                    android:layout_gravity="center"/>
-                <SeekBar
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:id="@+id/linearlayout_hubName">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="Hub"
+                        android:id="@+id/textview_hubName"
+                        android:textColor="@android:color/white"
+                        android:layout_marginTop="0dp"
+                        android:gravity="center_horizontal"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="caption"
+                        android:id="@+id/textview_caption"
+                        android:textColor="@android:color/white"
+                        android:gravity="center_horizontal"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Connected as:"
+                        android:textSize="10dp"
+                        android:textColor="@android:color/white"
+                        android:id="@+id/textview_connectionType"
+                        android:layout_gravity="center_horizontal"/>
+                </LinearLayout>
+                <Button
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/button_notifications"
+                    android:layout_gravity="end"
+                    android:background="@mipmap/ic_notifications"
+                    android:onClick="gotoNotifications" />
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/linearlayout_playback">
+
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/seekbar_volume"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="bottom"
+                    android:gravity="center_horizontal">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal">
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/imageview_volume"
+                            android:background="@mipmap/ic_volume"
+                            android:layout_gravity="center"/>
+                        <SeekBar
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/seekbar_volume"
+                            android:layout_gravity="center"/>
+                    </LinearLayout>
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="This Can't be Right"
+                        android:textColor="@android:color/white"
+                        android:id="@+id/textview_metadata"
+                        android:layout_marginTop="20dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearlayout_playback2"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="20dp">
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@mipmap/ic_previous"
+                        android:id="@+id/button_previous"
+                        android:onClick="prevSong"/>
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@mipmap/ic_pause"
+                        android:layout_marginTop="0dp"
+                        android:onClick="pauseSong"
+                        android:id="@+id/button_pause" />
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@mipmap/ic_play"
+                        android:id="@+id/button_play"
+                        android:onClick="playSong"/>
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@mipmap/ic_next"
+                        android:id="@+id/button_next"
+                        android:onClick="nextSong"/>
+                </LinearLayout>
             </LinearLayout>
 
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="This Can't be Right"
-                android:textColor="@android:color/white"
-                android:id="@+id/textview_metadata"
-                android:layout_marginTop="20dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/linearlayout_playback2"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="20dp">
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/ic_previous"
-                android:id="@+id/button_previous"
-                android:onClick="prevSong"/>
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/ic_pause"
-                android:layout_marginTop="0dp"
-                android:onClick="pauseSong"
-                android:id="@+id/button_pause" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/ic_play"
-                android:id="@+id/button_play"
-                android:onClick="playSong"/>
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@mipmap/ic_next"
-                android:id="@+id/button_next"
-                android:onClick="nextSong"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <RelativeLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/linearlayout_top"
-        android:layout_above="@id/linearlayout_playback"
-        android:gravity="center"
-        android:id="@+id/linearLayout5">
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/layout_topButtons">
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@mipmap/ic_bluetooth"
+            <RelativeLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/linearlayout_top"
+                android:layout_above="@id/linearlayout_playback"
                 android:gravity="center"
-                android:id="@+id/button_discoverable"
-                android:onClick="makeDiscoverable" />
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@mipmap/ic_requests"
-                android:gravity="center"
-                android:id="@+id/button_requests"
-                android:onClick="gotoRequests" />
-        </LinearLayout>
+                android:id="@+id/linearLayout5">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/layout_topButtons"
-            android:id="@+id/layout_connections">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/layout_topButtons">
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@mipmap/ic_bluetooth"
+                        android:gravity="center"
+                        android:id="@+id/button_discoverable"
+                        android:onClick="makeDiscoverable" />
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@mipmap/ic_requests"
+                        android:gravity="center"
+                        android:id="@+id/button_requests"
+                        android:onClick="gotoRequests" />
+                </LinearLayout>
 
-            <Button
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@mipmap/ic_users"
-                android:id="@+id/button_addUsers"
-                android:onClick="gotoConnUsers" />
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/layout_topButtons"
+                    android:id="@+id/layout_connections">
 
-            <Button
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@mipmap/ic_devices"
-                android:id="@+id/button_addDevices"
-                android:onClick="gotoConnDevices"
-                android:layout_gravity="center_horizontal" />
-        </LinearLayout>
+                    <Button
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@mipmap/ic_users"
+                        android:id="@+id/button_addUsers"
+                        android:onClick="gotoConnUsers" />
+
+                    <Button
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@mipmap/ic_devices"
+                        android:id="@+id/button_addDevices"
+                        android:onClick="gotoConnDevices"
+                        android:layout_gravity="center_horizontal" />
+                </LinearLayout>
 
 
-    </RelativeLayout>
+            </RelativeLayout>
+        </RelativeLayout>
+    </ViewFlipper>
 
 </RelativeLayout>

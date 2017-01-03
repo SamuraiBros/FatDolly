@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ViewFlipper;
 
 public class ConnectedDevices extends BaseActivity {
 
@@ -19,14 +20,33 @@ public class ConnectedDevices extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_connected_devices);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_connectedDevices);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connected_devices);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = ConnectedDevices.class.toString();
 
         running = true;
+
+        initializeLoading();
     }
 
     @Override

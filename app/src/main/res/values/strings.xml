@@ -131,7 +131,11 @@
     </string-array>
     <string-array name="loading_hub_message">
         <item>Configuring Changes...</item>
+        <item>Stopping Discovery...</item>
+        <item>Initializing manager...</item>
+        <item>Starting Discovery...</item>
         <item>Configuring service registration...</item>
+        <item>Requesting information from host...</item>
         <item>Starting Hub...</item>
     </string-array>
     <string-array name="theme_array">

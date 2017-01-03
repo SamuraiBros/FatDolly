@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 public class Notifications extends BaseActivity {
 
@@ -30,9 +31,26 @@ public class Notifications extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_notifications);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_notifications);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notifications);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = Notifications.class.toString();
@@ -179,6 +197,9 @@ public class Notifications extends BaseActivity {
         });
 
         running = true;
+
+        initializeLoading();
+
         Log.d(getResources().getString(R.string.app_name), "Notifications: onCreate: ended");
     }
 

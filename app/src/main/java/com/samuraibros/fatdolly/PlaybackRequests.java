@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,9 +40,26 @@ public class PlaybackRequests extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_playback_requests);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_playbackRequests);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_playback_requests);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = PlaybackRequests.class.toString();
@@ -49,6 +67,7 @@ public class PlaybackRequests extends BaseActivity {
 
         running = true;
 
+        initializeLoading();
     }
 
     @Override

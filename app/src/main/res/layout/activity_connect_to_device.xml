@@ -12,6 +12,16 @@
     android:background="@android:color/background_dark"
     tools:context="com.samuraibros.fatdolly.ConnectToDevice">
 
+    <ViewFlipper
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewFlipper_connectToDevice">
+
+        <include layout="@layout/loading_overlay"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,4 +71,7 @@
         android:layout_alignParentBottom="true"
         android:onClick="refresh"
         android:layout_centerHorizontal="true" />
+            </RelativeLayout>
+    </ViewFlipper>
+
 </RelativeLayout>

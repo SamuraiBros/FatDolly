@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,28 +56,28 @@ public class Hub extends BaseActivity {
     //Determines if Hub has been previously started
     public static boolean started = false;
 
-    FileServerAsyncTask Server;
-
     @Override
     protected void onReceive_helper(Context context, Intent intent) {
 
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hub);
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_hub);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_hub);
+        }
 
-        Server = new FileServerAsyncTask(this);
-        Server.execute();
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
 
-        //Get the needed configurations items
-        registerReceiver(mServerReceiver, mServerIntentFilter);
-        mClass_string = Hub.class.toString();
+    @Override
+    protected void initializeActivity_helper() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity starting...");
 
-        discoverService();
-
-        Log.d(getResources().getString(R.string.app_name), "Hub:Starting Hub: Bound Service...");
         // Update the hub name and controller info
         hubName_TextView = (TextView) findViewById(R.id.textview_hubName);
 
@@ -181,15 +181,14 @@ public class Hub extends BaseActivity {
                 /*if (!Configurations.isController()) {
                     String controllerAddress = Configurations.getControllerAddress();
                     permissions = Configurations.userAddressToPermissions(controllerAddress);
-                }
+                }*/
                 boolean playBackControl = permissions.contains(getResources().getString(R.string.permission_control_playback));
                 if (Configurations.isController() || playBackControl) {
                     nextSong(null);
                 }
                 else {
                     playBackRequest(Hub.this);
-                }*/
-                nextSong(null);
+                }
             }
         });
 
@@ -204,7 +203,7 @@ public class Hub extends BaseActivity {
                 }
                 boolean discoverabilityControl = permissions.contains(getResources().getString(R.string.permission_control_discoverability));
                 if (Configurations.isController() || discoverabilityControl) {
-                   //makeDiscoverable(null);
+                    //makeDiscoverable(null);
                 }
                 else {
                     discoverableRequest();
@@ -272,8 +271,21 @@ public class Hub extends BaseActivity {
             }
         }*/
 
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeActivity ending...");
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //Get the needed configurations items
+        registerReceiver(mServerReceiver, mServerIntentFilter);
+        mClass_string = Hub.class.toString();
+
+
         running = true;
-        Log.d(getResources().getString(R.string.app_name), "Hub:Started...");
+        initializeLoading();
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": onCreate...");
     }
 
     @Override
@@ -341,14 +353,5 @@ public class Hub extends BaseActivity {
             volume_ImageView.setAlpha(1f);
         }
 
-    }
-
-    @Override
-    public void nextSong(View view){
-        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Next Song... ");
-        String next = "Next Song";
-        Client myClient = new Client(Configurations.getControllerIP().getHostAddress(), 8888,next);
-        myClient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Done Next Song... ");
     }
 }

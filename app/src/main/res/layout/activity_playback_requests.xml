@@ -11,6 +11,16 @@
     tools:context="com.samuraibros.fatdolly.PlaybackRequests"
     android:background="@android:color/background_dark">
 
+    <ViewFlipper
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewFlipper_playbackRequests">
+
+        <include layout="@layout/loading_overlay"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,6 +84,8 @@
             android:id="@+id/button_clearRequests"
             android:onClick="clearRequests" />
     </LinearLayout>
+            </RelativeLayout>
+    </ViewFlipper>
 
 
 </RelativeLayout>

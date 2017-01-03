@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 public class Home extends BaseActivity {
 
@@ -38,11 +39,29 @@ public class Home extends BaseActivity {
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_home);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_home);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
+
         mClass_string = Home.class.toString();
 
         permissionsGranted = true;
@@ -51,6 +70,7 @@ public class Home extends BaseActivity {
         updateStatus();
 
         running = true;
+        initializeLoading();
 
         // Listens for permission grant and begins appropriate services
         /*Thread checkPermissionsThread = new CheckPermissionsThread();

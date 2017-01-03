@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
@@ -23,16 +24,21 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -41,7 +47,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     public static final String PREFERENCES_ID = "AUDHUB";
     protected static WifiP2pManager mManager;
     protected static WifiP2pManager.Channel mChannel;
-    protected BroadcastReceiver mReceiver;
     protected static WifiP2pManager.PeerListListener mPeerListListener;
     protected IntentFilter mIntentFilter;
     protected IntentFilter mServerIntentFilter;
@@ -50,6 +55,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     //Reference to the screen that called notifications
     protected Class<?> prev_screen;
     protected String mClass_string = BaseActivity.class.toString();
+    protected boolean discoveryEnabled = false;
+    protected boolean managerInitialized = false;
 
     //Reference to notifications button
     protected Button button_notifications;
@@ -76,6 +83,23 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected WifiP2pManager.DnsSdTxtRecordListener txtListener;
     protected WifiP2pManager.DnsSdServiceResponseListener servListener;
 
+    //Determines if waiting for certain message
+    private ArrayList<String> pending;
+
+    //Loacal intent to hold pending information
+    private Intent pendingData;
+
+    //Determines whether activity is running
+    public static boolean running = false;
+
+    //Local reference to message
+    private TextView message_textView;
+
+    protected ViewFlipper mViewFlipper;
+
+    //Toggled if connection interrupts loading
+    private boolean connected_failed = false;
+
     /*Configurations mService;
     boolean mBound = false;
 
@@ -87,13 +111,13 @@ public abstract class BaseActivity extends AppCompatActivity {
             Configurations.LocalBinder binder = (Configurations.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
-            Log.d(getResources().getString(R.string.app_name), "Hub: onServiceConnected...");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": onServiceConnected...");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBound = false;
-            Log.d(getResources().getString(R.string.app_name), "Hub: onServiceDisconnected...");
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": onServiceDisconnected...");
         }
     };*/
 
@@ -107,7 +131,26 @@ public abstract class BaseActivity extends AppCompatActivity {
             String action = intent.getAction();
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": BroadcastReceiver: Action to " + action);
             //Checks to see if bluetooth on/off status changes
-            if (action.equals("")) {
+            if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+                // Check to see if Wi-Fi is enabled and notify appropriate activity
+                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+                if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                    // Wifi P2P is enabled
+                } else {
+                    // Wi-Fi P2P is not enabled
+                }
+            } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+                // Call WifiP2pManager.requestPeers() to get a list of current peers
+                // request available peers from the wifi p2p manager. This is an
+                // asynchronous call and the calling activity is notified with a
+                // callback on PeerListListener.onPeersAvailable()
+                if (mManager != null) {
+                    mManager.requestPeers(mChannel, mPeerListListener);
+                }
+            } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
+                // Respond to new connection or disconnections
+            } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
+                // Respond to this device's wifi state changing
             }
             else {
                 onReceive_helper(context, intent);
@@ -117,6 +160,31 @@ public abstract class BaseActivity extends AppCompatActivity {
     };
 
     protected abstract void onReceive_helper(Context context, Intent intent);
+
+    protected  void showLoading(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: starting...");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                    showLoading_helper(val);
+            }
+        });
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: ending...");
+    }
+
+    protected abstract void showLoading_helper(final boolean val);
+
+    protected void initializeActivity() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                initializeActivity_helper();
+            }
+        });
+    }
+
+
+    protected abstract void initializeActivity_helper();
 
     public BaseActivity() {
 
@@ -133,68 +201,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         mServerIntentFilter = new IntentFilter();
 
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mPeerListListener = new WifiP2pManager.PeerListListener() {
-            @Override
-            public void onPeersAvailable(WifiP2pDeviceList peers) {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": onPeersAvailable: received...");
-                ArrayList<WifiP2pDevice> peer_list = new ArrayList<>(peers.getDeviceList());
-                Intent i = new Intent(getResources().getString(R.string.intent_on_peers_available));
-                i.putParcelableArrayListExtra(getResources().getString(R.string.extra_peer_list), peer_list);
-                sendBroadcast(i);
-            }
-        };
-        mReceiver = new WiFiDirectBroadcastReceiver();
+        mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-        txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
-            @Override
-            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": DnsSdTxtRecord available -" + record.toString());
-                if (!peerHubs.keySet().contains(device.deviceAddress)) {
-                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": NEW DnsSdTxtRecord available -" + record.toString());
-                    peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hub_name)));
-                    discoverService();
-                }
-            }
-        };
-
-        servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-            @Override
-            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
-                                                WifiP2pDevice resourceType) {
-
-                // Update the device name with the human-friendly version from
-                // the DnsTxtRecord, assuming one arrived.
-                resourceType.deviceName = peerHubs
-                        .containsKey(resourceType.deviceAddress) ? peerHubs
-                        .get(resourceType.deviceAddress) : resourceType.deviceName;
-
-                // Add to the custom adapter defined specifically for showing
-                // wifi devices.
-
-                Log.d(getResources().getString(R.string.app_name), "onBonjourServiceAvailable " + instanceName);
-            }
-        };
-
-        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
-
-        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
-        mManager.addServiceRequest(mChannel,
-                serviceRequest,
-                new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        // Success!
-                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Success");
-                    }
-
-                    @Override
-                    public void onFailure(int code) {
-                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Failed");
-                    }
-                });
 
         //Retrieves the reference to the calling activity class
         String class_name = getIntent().getStringExtra(getResources().getString(R.string.extra_sender_class));
@@ -209,10 +220,39 @@ public abstract class BaseActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        
+
+        pending = new ArrayList<>();
+        pendingData = new Intent();
+
+        String loading_type = getIntent().getStringExtra(getResources().getString(R.string.extra_loading_type));
+
+        if (loading_type != null) {
+            showLoading(true);
+
+            //Update loading message
+            message_textView = (TextView) findViewById(R.id.textView_loadingOverlayMessage);
+            message_textView.setText(loading_type);
+
+            connected_failed = false;
+        } else {
+            showLoading(false);
+        }
+
 
         //Service bindning to ensure that service does not continue in background after closing
         /*Intent i = new Intent(this, Configurations.class);
         bindService(i, MyConfigurations_Conn, Context.BIND_AUTO_CREATE);*/
+    }
+
+    protected void initializeLoading() {
+        String loading_type = getIntent().getStringExtra(getResources().getString(R.string.extra_loading_type));
+        if (loading_type != null) {
+            if (loading_type.equals(getResources().getString(R.string.loading_hub)) || loading_type.equals(getResources().getString(R.string.loading_connect_to_hub))) {
+                LoadHubThread thread = new LoadHubThread(loading_type);
+                thread.start();
+            }
+        }
     }
 
     /* register the broadcast receiver with the intent values to be matched */
@@ -231,6 +271,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(mServerReceiver);
     }
+
 
     protected void startRegistration() {
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: starting...");
@@ -295,24 +336,134 @@ public abstract class BaseActivity extends AppCompatActivity {
         registration_status = null;
     }
 
+    protected void initializeWifiManager() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeWifiManager(): starting...");
+        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mPeerListListener = new WifiP2pManager.PeerListListener() {
+            @Override
+            public void onPeersAvailable(WifiP2pDeviceList peers) {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": onPeersAvailable: received...");
+                ArrayList<WifiP2pDevice> peer_list = new ArrayList<>(peers.getDeviceList());
+                Intent i = new Intent(getResources().getString(R.string.intent_on_peers_available));
+                i.putParcelableArrayListExtra(getResources().getString(R.string.extra_peer_list), peer_list);
+                sendBroadcast(i);
+            }
+        };
+
+        txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+            @Override
+            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": DnsSdTxtRecord available -" + record.toString());
+                if (!peerHubs.keySet().contains(device.deviceAddress)) {
+                    Log.d(getResources().getString(R.string.app_name), mClass_string + ": NEW DnsSdTxtRecord available -" + record.toString());
+                    peerHubs.put(device.deviceAddress, (String) record.get(getResources().getString(R.string.record_hub_name)));
+                }
+            }
+        };
+
+        servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+            @Override
+            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+                                                WifiP2pDevice resourceType) {
+
+                // Update the device name with the human-friendly version from
+                // the DnsTxtRecord, assuming one arrived.
+                resourceType.deviceName = peerHubs
+                        .containsKey(resourceType.deviceAddress) ? peerHubs
+                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+
+                // Add to the custom adapter defined specifically for showing
+                // wifi devices.
+
+                Log.d(getResources().getString(R.string.app_name), "onBonjourServiceAvailable " + instanceName);
+            }
+        };
+
+        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
+
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        mManager.addServiceRequest(mChannel,
+                serviceRequest,
+                new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        // Success!
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Success");
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": InitializeWifiManager Success");
+                        managerInitialized = true;
+                    }
+
+                    @Override
+                    public void onFailure(int code) {
+                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Failed");
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": InitializeWifiManager Failed");
+                        managerInitialized = false;
+                    }
+                });
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": initializeWifiManager(): ending...");
+    }
+
+    protected void stopDiscoveryService() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): starting...");
+
+        mManager.stopPeerDiscovery(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                mManager.clearServiceRequests(mChannel, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        mManager.clearLocalServices(mChannel, new WifiP2pManager.ActionListener() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): succeeded.");
+                                discoveryEnabled = false;
+                            }
+
+                            @Override
+                            public void onFailure(int reason) {
+                                Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): failed clearLocalServices...");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): failed clearServiceRequests...");
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): failed stopPeerDiscovery...");
+            }
+        });
+
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": stopDiscoveryService(): ending...");
+
+     }
+
     /**
      * Used to detect available peers that are in range
      */
-    protected void discoverService() {
-        Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): starting...");
+    protected void startDiscoveryService() {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": startDiscoveryService(): starting...");
 
         mManager.discoverServices(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
             public void onSuccess() {
                 // Success!
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): P2P discovery success.");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": startDiscoveryService(): P2P discovery success.");
+                discoveryEnabled = true;
             }
 
             @Override
             public void onFailure(int code) {
                 // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-                Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): P2P discovery failed.");
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": startDiscoveryService(): P2P discovery failed.");
                 if (code == WifiP2pManager.P2P_UNSUPPORTED) {
                     Log.d(getResources().getString(R.string.app_name), mClass_string + ": P2P isn't supported on this device.");
                 }
@@ -327,16 +478,29 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
         });
-        Log.d(getResources().getString(R.string.app_name), mClass_string + ": discoverService(): ended...");
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": startDiscoveryService(): ended...");
     }
 
+    /**
+     * Updates the loading message
+     */
+    protected void updateLoadingMessage(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView message_textVie = (TextView) findViewById(R.id.textView_loadingOverlayMessage);
+                message_textVie.setText(message);
+            }
+        });
+    }
+    
     /**
      * Closes and opens given activity
      * @param
      */
     protected void close (Class c){
         Intent intent;
-        if (c == Loading.class || c == null) {
+        if (c == null) {
             intent = new Intent(this, Home.class);
         }
         else {
@@ -371,7 +535,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         });
 
-        if (mClass_string.equals(Hub.class.toString()) || mClass_string.equals(ConnectToHub.class.toString()) || mClass_string.equals(Loading.class.toString())) {
+        if (mClass_string.equals(Hub.class.toString()) || mClass_string.equals(ConnectToHub.class.toString())) {
             // Displays the dialogue
             alertDialog.show();
         }
@@ -382,7 +546,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void onBackPressed_helper() {
-        if (mClass_string.equals(Loading.class.toString()) || mClass_string.equals(ConnectToHub.class.toString()) || mClass_string.equals(Hub.class.toString())) {
+        if (mClass_string.equals(ConnectToHub.class.toString()) || mClass_string.equals(Hub.class.toString())) {
             close(Home.class);
         } else {
             //Retrieves the reference to the calling activity class
@@ -618,7 +782,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void nextSong(View view){
-
+        String next = "Next Song";
+        sendMessage(next);
         /*
         Intent i = new Intent("ChangePlayback");
         i.putExtra("Change", "Next");
@@ -674,7 +839,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         });
 
         // Displays the dialogue
-        if (mClass_string.equals(Home.class.toString()) || mClass_string.equals(Loading.class.toString())) {
+        if (mClass_string.equals(Home.class.toString())) {
             gotoConnectToHub_helper();
         }
         else{
@@ -682,9 +847,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+
     protected void gotoConnectToHub_helper() {
-        Intent intent = new Intent(BaseActivity.this, Loading.class);
+        Intent intent = new Intent(BaseActivity.this, ConnectToHub.class);
         Configurations.setController(false);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_connect_to_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
@@ -719,7 +886,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         });
 
         // Displays the dialogue
-        if (mClass_string.equals(Home.class.toString()) || mClass_string.equals(Loading.class.toString())) {
+        if (mClass_string.equals(Home.class.toString())) {
             gotoHub_helper();
         }
         else{
@@ -728,20 +895,24 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void gotoHub_helper() {
-        Intent intent = new Intent(BaseActivity.this, Loading.class);
-        Configurations.setController(true);
+        Intent intent = new Intent(BaseActivity.this, Hub.class);
+        if (!mClass_string.equals(ConnectToHub.class.toString()))
+            Configurations.setController(true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(getResources().getString(R.string.extra_sender_class), mClass_string);
         intent.putExtra(getResources().getString(R.string.extra_loading_type), getResources().getString(R.string.loading_hub));
         intent.putExtra(getResources().getString(R.string.extra_loading_class), ConnectToHub.class.toString());
         startActivity(intent);
         finish();
     }
-/*
+
     private void connectWithServer() {
-        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Connection... " + Configurations.getControllerIP().getHostAddress());
+        Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Start Connection... ");
         try {
             if (clientSocket == null) {
-                clientSocket = new Socket(Configurations.getControllerIP().getHostAddress(), 8888);
+                clientSocket = new Socket();
+                clientSocket.bind(null);
+                clientSocket.connect((new InetSocketAddress(host, port)), 500);
                 if (clientSocket == null)
                 {
                     Log.d(getResources().getString(R.string.app_name), "Hub:Connect to Server: Client Socket is NULL ");
@@ -789,5 +960,176 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         Log.d(getResources().getString(R.string.app_name), "Hub:Send a Message: Done Sending...");
     }
-    */
+
+    /**
+     * Initialize the hub
+     */
+    private class LoadHubThread extends Thread {
+        private final String loading_type;
+        public LoadHubThread(String l_t) {
+            loading_type = l_t;
+        }
+
+        public void run() {
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is running");
+            Iterator<String> message = Arrays.asList(getResources().getStringArray(R.array.loading_hub_message)).iterator();
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            String message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            Configurations.resetConfigurations(BaseActivity.this);
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            if (managerInitialized) {
+
+                stopDiscoveryService();
+
+                while (discoveryEnabled) {
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            initializeWifiManager();
+
+            while (!managerInitialized) {
+                try {
+                    sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            startDiscoveryService();
+
+            while (!discoveryEnabled) {
+                try {
+                    sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            if (Configurations.isController())
+                startRegistration();
+            else
+                removeRegistration();
+
+            while (registration_status == null) {
+                try {
+                    sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            while ((!registration_status.equals(getResources().getString(R.string.value_registration_succeeded)) && Configurations.isController()) ||
+                    (!registration_status.equals(getResources().getString(R.string.value_unregistration_succeeded)) && !Configurations.isController())) {
+                try {
+                    sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (registration_status.equals(getResources().getString(R.string.value_registration_failed))) {
+                    resetRegistration();
+                    startRegistration();
+                } else if (registration_status.equals(getResources().getString(R.string.value_unregistration_failed))) {
+                    resetRegistration();
+                    removeRegistration();
+                }
+            }
+            resetRegistration();
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+
+            if (loading_type.equals(getResources().getString(R.string.loading_hub)) && !Configurations.isController()) {
+                Configurations.setControllerIP(null);
+
+                while (Configurations.getControllerIP() == null) {
+                    BaseActivity.mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                        @Override
+                        public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                            InetAddress temp = info.groupOwnerAddress;
+                            Configurations.setControllerIP(temp);
+                        }
+                    });
+
+                    try {
+                        sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }
+
+
+            message_string = message.next();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
+            updateLoadingMessage(message_string);
+
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            /*if (loading_type.equals(getResources().getString(R.string.loading_hub))) {
+                gotoHub_helper();
+            } else if (loading_type.equals(getResources().getString(R.string.loading_connect_to_hub))) {
+                gotoConnectToHub_helper();
+            }*/
+            showLoading(false);
+            initializeActivity();
+            Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread is finishing");
+
+        }
+    }
 }

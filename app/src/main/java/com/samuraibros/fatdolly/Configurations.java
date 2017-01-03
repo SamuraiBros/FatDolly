@@ -1311,13 +1311,7 @@ public class Configurations extends Application {
      * @param activity
      */
     public static void addActivityToStack(String activity) {
-        if (activity.equals(Loading.class.toString())) {
-            activitiesStack.clear();
-            activitiesStack.add(Home.class.toString());
-        }
-        else {
             activitiesStack.add(activity);
-        }
     }
 
     /**

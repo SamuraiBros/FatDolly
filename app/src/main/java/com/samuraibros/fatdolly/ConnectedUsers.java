@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import java.util.ArrayList;
 
@@ -28,9 +29,25 @@ public class ConnectedUsers extends BaseActivity{
     }
 
     @Override
+    protected void showLoading_helper(final boolean val) {
+        Log.d(getResources().getString(R.string.app_name), mClass_string + ": showLoading: displaying activity screen...");
+        if (mViewFlipper == null) {
+            setContentView(R.layout.activity_connected_users);
+            mViewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper_connectedUsers);
+        }
+
+        if (!val) {
+            mViewFlipper.showNext();
+        }
+    }
+    @Override
+    protected void initializeActivity_helper() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connected_users);
 
         registerReceiver(mServerReceiver, mServerIntentFilter);
         mClass_string = ConnectedUsers.class.toString();
@@ -251,6 +268,8 @@ public class ConnectedUsers extends BaseActivity{
 
 
         running = true;
+
+        initializeLoading();
         Log.d(getResources().getString(R.string.app_name), "ConnectedUsers: onCreate: ended");
     }
 
