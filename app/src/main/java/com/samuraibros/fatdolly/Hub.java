@@ -56,6 +56,9 @@ public class Hub extends BaseActivity {
     //Determines if Hub has been previously started
     public static boolean started = false;
 
+    //Create the server end
+    FileServerAsyncTask server;
+
     @Override
     protected void onReceive_helper(Context context, Intent intent) {
 
@@ -187,7 +190,8 @@ public class Hub extends BaseActivity {
                     nextSong(null);
                 }
                 else {
-                    playBackRequest(Hub.this);
+                    nextSong(null);
+                    //playBackRequest(Hub.this);
                 }
             }
         });
@@ -277,6 +281,10 @@ public class Hub extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Create Server Instance
+        server = new FileServerAsyncTask(this);
+        server.execute();
 
         //Get the needed configurations items
         registerReceiver(mServerReceiver, mServerIntentFilter);

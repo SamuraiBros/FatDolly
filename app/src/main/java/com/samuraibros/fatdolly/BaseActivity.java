@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -783,7 +784,9 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void nextSong(View view){
         String next = "Next Song";
-        sendMessage(next);
+        //sendMessage(next);
+        Client client = new Client("192.168.49.1",8888,next);
+        client.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         /*
         Intent i = new Intent("ChangePlayback");
         i.putExtra("Change", "Next");
