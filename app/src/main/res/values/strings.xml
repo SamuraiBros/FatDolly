@@ -50,6 +50,7 @@
     <string name="intent_initial_user_information_set">InitialUserInformationSet</string>
     <string name="intent_internal_closure">InternalClosure</string>
     <string name="intent_new_notification">NewNotification</string>
+    <string name="intent_next_song">NextSong</string>
     <string name="intent_on_peers_available">New Peer List</string>
     <string name="intent_refresh_connected_users">RefreshConnectedUsers</string>
     <string name="intent_refresh_playback_requests">RefreshPlaybackRequests</string>
