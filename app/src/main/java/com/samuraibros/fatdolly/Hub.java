@@ -203,7 +203,7 @@ public class Hub extends BaseActivity {
                 }
                 boolean discoverabilityControl = permissions.contains(getResources().getString(R.string.permission_control_discoverability));
                 if (Configurations.isController() || discoverabilityControl) {
-                    //makeDiscoverable(null);
+                    startDiscoveryService();
                 }
                 else {
                     discoverableRequest();

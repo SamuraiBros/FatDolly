@@ -187,7 +187,7 @@
                         style="?android:attr/buttonStyleSmall"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:background="@mipmap/ic_bluetooth"
+                        android:background="@mipmap/ic_wifi"
                         android:gravity="center"
                         android:id="@+id/button_discoverable"
                         android:onClick="makeDiscoverable" />
@@ -195,7 +195,7 @@
                         style="?android:attr/buttonStyleSmall"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
-                        android:background="@mipmap/ic_requests"
+                        android:background="@mipmap/ic_request"
                         android:gravity="center"
                         android:id="@+id/button_requests"
                         android:onClick="gotoRequests" />
