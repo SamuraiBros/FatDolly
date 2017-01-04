@@ -8,8 +8,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 /**
  * Created by Takondwa Kakusa on 1/2/2017.
@@ -49,7 +53,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
     }
 
     private void connectWithServer() {
-        Log.d("Client", "Client:Connect to Server: Start Connection... " + Configurations.getControllerIP().getHostAddress());
+        Log.d("Client", "Client:Connect to Server: Start Connection... " + getIpAddress());
         try {
             if (clientSocket == null) {
                 clientSocket = new Socket(host, 8888);
@@ -85,6 +89,36 @@ public class Client extends AsyncTask<Void, Void, Void> {
             disConnectWithServer();
         }
         Log.d("Client", "Client:Send a Message: Done Sending...");
+    }
+
+    public String getIpAddress() {
+        String ip = "";
+        try {
+            Enumeration<NetworkInterface> enumNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (enumNetworkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = enumNetworkInterfaces
+                        .nextElement();
+                Enumeration<InetAddress> enumInetAddress = networkInterface
+                        .getInetAddresses();
+                while (enumInetAddress.hasMoreElements()) {
+                    InetAddress inetAddress = enumInetAddress
+                            .nextElement();
+
+                    if (inetAddress.isSiteLocalAddress()) {
+                        if (inetAddress.getHostAddress().toString().toLowerCase().contains("192.168.49")) {
+                            ip += "Server running at : "
+                                    + inetAddress.getHostAddress();
+                        }
+                    }
+                }
+            }
+
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ip += "Something Wrong! " + e.toString() + "\n";
+        }
+        return ip;
     }
 
 }

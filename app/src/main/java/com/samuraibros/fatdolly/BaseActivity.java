@@ -153,7 +153,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 // Respond to new connection or disconnections
             } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                 // Respond to this device's wifi state changing
-            } else if (action.equals("Next Song")) {
+            } else if (action.equals(getResources().getString(R.string.intent_next_song))) {
                 Toast.makeText(getApplicationContext(), "NEXT SONG", Toast.LENGTH_SHORT).show();
             }
             else {
@@ -787,7 +787,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param view
      */
     public void nextSong(View view){
-        String next = "Next Song";
+        String next = getResources().getString(R.string.intent_next_song);
         Client client = new Client("192.168.49.1",8888,next);
         client.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         /*

@@ -58,15 +58,14 @@ public class FileServerAsyncTask extends AsyncTask<Void, Void, Void> {
                 nis = client.getInputStream();
 
                 String msgOut = receiveDataFromServer();
-                try {
-                    Intent i = new Intent(msgOut);
-                    context.sendBroadcast(i);
-                }catch (Exception e) {
-                    System.out.print(e);
-                }
+
+                Intent i = new Intent(msgOut);
+                context.sendBroadcast(i);
 
 
-                Log.i("AsyncTask", "doInBackground: Message Received");
+
+
+                Log.i("AsyncTask", "doInBackground: Message Received: " + msgOut);
                 //Toast.makeText(this.context, "Message Received!", Toast.LENGTH_SHORT).show();
                 serverSocket.close();
 
@@ -96,8 +95,10 @@ public class FileServerAsyncTask extends AsyncTask<Void, Void, Void> {
                             .nextElement();
 
                     if (inetAddress.isSiteLocalAddress()) {
-                        ip += "Server running at : "
-                                + inetAddress.getHostAddress();
+                        if (inetAddress.getHostAddress().toString().toLowerCase().contains("192.168")) {
+                            ip += "Server running at : "
+                                    + inetAddress.getHostAddress();
+                        }
                     }
                 }
             }
