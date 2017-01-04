@@ -165,7 +165,13 @@ public abstract class BaseActivity extends AppCompatActivity {
                 if (wifi_group.getClientList().size() > 0) {
                     t = Toast.makeText(BaseActivity.this, "isOwner:" + Boolean.toString(wifi_group.isGroupOwner()), Toast.LENGTH_LONG);
                     t.show();
+
+                    for (WifiP2pDevice dev : wifi_group.getClientList()) {
+                        Configurations.setUserInformation(BaseActivity.this, dev.deviceAddress, dev.deviceName, new ArrayList<String>(), getResources().getString(R.string.value_acceptor), true);
+                    }
                 }
+
+
             } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                 // Respond to this device's wifi state changing
             } else if (action.equals("Next Song")) {
@@ -1142,7 +1148,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
 
-            /*message_string = message.next();
+            message_string = message.next();
 
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
             updateLoadingMessage(message_string);
@@ -1188,7 +1194,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
                 }
             }
-            */
+
 
 
             message_string = message.next();
