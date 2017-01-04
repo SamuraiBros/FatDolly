@@ -1,6 +1,7 @@
 package com.samuraibros.fatdolly;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -53,13 +54,19 @@ public class FileServerAsyncTask extends AsyncTask<Void, Void, Void> {
                  * Save the input stream from the client as a JPEG file
                  */
 
-                Log.d("AsyncTask", "doInBackground: Socket created, streams assigned: ");
+                Log.d("AsyncTask", "doInBackground: Socket created, streams assigned");
                 nis = client.getInputStream();
 
                 String msgOut = receiveDataFromServer();
+                try {
+                    Intent i = new Intent(msgOut);
+                    context.sendBroadcast(i);
+                }catch (Exception e) {
+                    System.out.print(e);
+                }
 
 
-                Log.i("AsyncTask", "doInBackground: Message Received: " + msgOut);
+                Log.i("AsyncTask", "doInBackground: Message Received");
                 //Toast.makeText(this.context, "Message Received!", Toast.LENGTH_SHORT).show();
                 serverSocket.close();
 

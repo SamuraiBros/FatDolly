@@ -17,6 +17,7 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -167,6 +168,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                 // Respond to this device's wifi state changing
+            } else if (action.equals("Next Song")) {
+                Toast.makeText(getApplicationContext(), "NEXT SONG", Toast.LENGTH_SHORT).show();
             }
             else {
                 onReceive_helper(context, intent);
@@ -223,6 +226,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mServerIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        mServerIntentFilter.addAction(getResources().getString(R.string.intent_next_song));
 
 
         //Retrieves the reference to the calling activity class
@@ -854,7 +858,8 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void nextSong(View view){
         String next = "Next Song";
-        sendMessage(next);
+        Client client = new Client("192.168.49.1",8888,next);
+        client.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         /*
         Intent i = new Intent("ChangePlayback");
         i.putExtra("Change", "Next");
