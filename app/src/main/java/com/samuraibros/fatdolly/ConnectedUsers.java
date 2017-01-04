@@ -308,9 +308,9 @@ public class ConnectedUsers extends BaseActivity{
         connectedUsers_listView.setAdapter(connectedUsers_arrayAdapter);
 
         // Loop through connected users and add the name and address to the list
-        /*for (String addr : Configurations.getUserAddresses()) {
-            BluetoothDevice device = Configurations.userAddressToSocket(addr).getRemoteDevice();
-            connectedUsers_arrayAdapter.add(device.getName());
-        }*/
+        for (String addr : Configurations.getUserAddresses()) {
+            String name = Configurations.userAddressToName(addr);
+            connectedUsers_arrayAdapter.add(name);
+        }
     }
 }

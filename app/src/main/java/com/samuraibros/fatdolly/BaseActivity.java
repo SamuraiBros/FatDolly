@@ -9,8 +9,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
@@ -33,6 +35,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -151,6 +155,23 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
                 // Respond to new connection or disconnections
+                WifiP2pGroup wifi_group = (WifiP2pGroup) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP);
+                NetworkInfo info = (NetworkInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                Log.d(getResources().getString(R.string.app_name), mClass_string + ": BroadcastReceiver: isGroupOwner: " + Boolean.toString(wifi_group.isGroupOwner()) + " Number peers: " + Integer.toString(wifi_group.getClientList().size()));
+
+                Toast t = Toast.makeText(BaseActivity.this, mClass_string + ": BroadcastReceiver: isGroupOwner: " + Boolean.toString(wifi_group.isGroupOwner()) + " Number peers: " + Integer.toString(wifi_group.getClientList().size()), Toast.LENGTH_LONG);
+                t.show();
+
+                if (wifi_group.getClientList().size() > 0) {
+                    t = Toast.makeText(BaseActivity.this, "isOwner:" + Boolean.toString(wifi_group.isGroupOwner()), Toast.LENGTH_LONG);
+                    t.show();
+
+                    for (WifiP2pDevice dev : wifi_group.getClientList()) {
+                        Configurations.setUserInformation(BaseActivity.this, dev.deviceAddress, dev.deviceName, new ArrayList<String>(), getResources().getString(R.string.value_acceptor), true);
+                    }
+                }
+
+
             } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                 // Respond to this device's wifi state changing
             } else if (action.equals(getResources().getString(R.string.intent_next_song))) {
@@ -162,6 +183,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
 
     };
+
+
 
     protected abstract void onReceive_helper(Context context, Intent intent);
 
@@ -277,6 +300,43 @@ public abstract class BaseActivity extends AppCompatActivity {
         unregisterReceiver(mServerReceiver);
     }
 
+    protected void disconnect() {
+        if (mManager != null && mChannel != null) {
+            mManager.requestGroupInfo(mChannel, new WifiP2pManager.GroupInfoListener() {
+                @Override
+                public void onGroupInfoAvailable(WifiP2pGroup group) {
+                    if (group != null && mManager != null && mChannel != null) {
+                        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
+
+                            @Override
+                            public void onSuccess() {
+                                Log.d(getResources().getString(R.string.app_name), mClass_string + ": disconnect(): removeGroup onSuccess -");
+                            }
+
+                            @Override
+                            public void onFailure(int reason) {
+                                Log.d(getResources().getString(R.string.app_name), mClass_string + ": disconnect(): removeGroup onFailure -" + reason);
+                            }
+                        });
+
+                        /*try {
+                            Method getNetworkId = WifiP2pGroup.class.getMethod("getNetworkId");
+                            Integer networkId = (Integer) getNetworkId.invoke(group);
+                            Method deletePersistentGroup = WifiP2pManager.class.getMethod("deletePersistentGroup",
+                                    WifiP2pManager.Channel.class, Integer.class, WifiP2pManager.ActionListener.class);
+                            deletePersistentGroup.invoke(mManager, mChannel, networkId, null);
+                        } catch (NoSuchMethodException e) {
+                            Log.e("WIFI", "Could not delete persistent group", e);
+                        } catch (InvocationTargetException e) {
+                            Log.e("WIFI", "Could not delete persistent group", e);
+                        } catch (IllegalAccessException e) {
+                            Log.e("WIFI", "Could not delete persistent group", e);
+                        }*/
+                    }
+                }
+            });
+        }
+    }
 
     protected void startRegistration() {
         Log.d(getResources().getString(R.string.app_name), mClass_string + ": startRegistration: starting...");
@@ -318,7 +378,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": removeRegistration: success");
             registration_status = getResources().getString(R.string.value_unregistration_succeeded);
         } else {
-            mManager.removeLocalService(mChannel, serviceInfo, new WifiP2pManager.ActionListener() {
+            mManager.clearLocalServices(mChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     // Command successful! Code isn't necessarily needed here,
@@ -396,7 +456,23 @@ public abstract class BaseActivity extends AppCompatActivity {
                         // Success!
                         Log.d(getResources().getString(R.string.app_name), mClass_string + ": AddingServiceRequest Success");
                         Log.d(getResources().getString(R.string.app_name), mClass_string + ": InitializeWifiManager Success");
-                        managerInitialized = true;
+                        if (Configurations.isController()) {
+                            mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
+                                @Override
+                                public void onSuccess() {
+                                    managerInitialized = true;
+                                }
+
+                                @Override
+                                public void onFailure(int reason) {
+                                    managerInitialized = false;
+                                }
+                            });
+                        }
+                        else {
+                            managerInitialized = true;
+                        }
+
                     }
 
                     @Override
@@ -1003,7 +1079,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             updateLoadingMessage(message_string);
 
             if (managerInitialized) {
-
                 stopDiscoveryService();
 
                 while (discoveryEnabled) {
@@ -1019,7 +1094,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
             updateLoadingMessage(message_string);
 
+            if (mManager != null) {
+                disconnect();
+            }
             initializeWifiManager();
+            disconnect();
 
             while (!managerInitialized) {
                 try {
@@ -1070,9 +1149,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
 
             message_string = message.next();
+
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
             updateLoadingMessage(message_string);
 
+            /*
             while ((!registration_status.equals(getResources().getString(R.string.value_registration_succeeded)) && Configurations.isController()) ||
                     (!registration_status.equals(getResources().getString(R.string.value_unregistration_succeeded)) && !Configurations.isController())) {
                 try {
@@ -1089,6 +1170,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
             resetRegistration();
+            */
 
             message_string = message.next();
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
@@ -1114,6 +1196,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
                 }
             }
+
 
 
             message_string = message.next();

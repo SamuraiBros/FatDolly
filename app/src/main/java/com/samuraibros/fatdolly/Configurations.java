@@ -1496,34 +1496,39 @@ public class Configurations extends Application {
             } catch (IOException e) {
                 e.printStackTrace();
             }*/
-            if (hostHub) {
+            /*if (hostHub) {
                 Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.1");
                 userAddressPendingSet.add(address);
                 Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to pending user set");
-            }
+                }
             else {
                 Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.2");
                 userAddressSet.add(address);
                 Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to active user set");
-            }
+            }*/
 
-            userNameAddressMaps.put(name, address);
-            userAddressNameMap.put(address, name);
-            setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_connection), false);
-            //userAddressSocketMap.put(address, socket);
-            //Start thread to manage user connection
-            if (hostHub) {
-                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.3");
-                //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_controller_from_user)));
-            }
-            else {
-                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.4");
-                //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_user_from_user)));
-                //Intent i = new Intent("UserConfirmation");
-                //sendBroadcast(i);
-            }
+            if (!userAddressSet.contains(address)) {
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.2");
+                userAddressSet.add(address);
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Added: " + address + " to active user set");
 
-            //userAddressThreadMap.get(address).start();
+                userNameAddressMaps.put(name, address);
+                userAddressNameMap.put(address, name);
+                setUserPermissions(c, address, permissions, c.getResources().getString(R.string.value_connection), false);
+                //userAddressSocketMap.put(address, socket);
+                //Start thread to manage user connection
+                if (hostHub) {
+                    Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.3");
+                    //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_controller_from_user)));
+                } else {
+                    Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 2.4");
+                    //userAddressThreadMap.put(address, new ConnectionListenerThread(socket, c.getResources().getString(R.string.value_as_user_from_user)));
+                    //Intent i = new Intent("UserConfirmation");
+                    //sendBroadcast(i);
+                }
+
+                //userAddressThreadMap.get(address).start();
+            }
         }
         else  if (type.equals(c.getResources().getString(R.string.value_requester))) {
             Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Part 3");
@@ -1560,6 +1565,28 @@ public class Configurations extends Application {
 
         Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Ended");
         return new_user;
+    }
+
+    public static void confirmUserInformation(Context c, String address, boolean thread_safe) {
+        if (thread_safe) {
+            try {
+                userDataLock.acquire();
+                Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Acquired user lock");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (userAddressPendingSet.contains(address)) {
+            userAddressPendingSet.remove(address);
+            userAddressSet.add(address);
+        }
+
+
+        if (thread_safe) {
+            userDataLock.release();
+            Log.d(c.getResources().getString(R.string.app_name), mClass_string + ": setUserInformation: Released user lock");
+        }
     }
 
     // CleanUp
