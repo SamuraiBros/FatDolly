@@ -1153,6 +1153,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
             updateLoadingMessage(message_string);
 
+            /*
             while ((!registration_status.equals(getResources().getString(R.string.value_registration_succeeded)) && Configurations.isController()) ||
                     (!registration_status.equals(getResources().getString(R.string.value_unregistration_succeeded)) && !Configurations.isController())) {
                 try {
@@ -1169,6 +1170,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
             resetRegistration();
+            */
 
             message_string = message.next();
             Log.d(getResources().getString(R.string.app_name), mClass_string + ": LoadHubThread " + message_string);
